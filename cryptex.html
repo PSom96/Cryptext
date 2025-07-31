@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cryptex Word Puzzle</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+    .wheel {
+      margin: 10px;
+    }
+    select {
+      font-size: 1.2em;
+      padding: 5px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.3em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cryptex Word Puzzle</h1>
+  <p>Select one letter from each wheel to form a 5-letter word:</p>
+
+  <div id="wheels"></div>
+  <button onclick="checkWord()">Check Word</button>
+  <div id="result"></div>
+
+  <script>
+    const wheels = [
+      ['E', 'N', 'G', 'I', 'N', 'E'],
+      ['C', 'A', 'P', 'I', 'T', 'A', 'L', 'S'],
+      ['T', 'A', 'S', 'T', 'Y'],
+      ['B', 'R', 'O', 'W', 'N', 'I', 'E'],
+      ['A', 'L', 'M', 'O', 'N', 'D']
+    ];
+
+    const validWords = ['easel', 'nitro', 'gated', 'gland', 'eased']; // Add more as needed
+
+    const wheelsContainer = document.getElementById('wheels');
+
+    wheels.forEach((letters, i) => {
+      const select = document.createElement('select');
+      select.classList.add('wheel');
+      select.id = `wheel${i}`;
+      letters.forEach(letter => {
+        const option = document.createElement('option');
+        option.value = letter.toLowerCase();
+        option.textContent = letter.toUpperCase();
+        select.appendChild(option);
+      });
+      wheelsContainer.appendChild(select);
+    });
+
+    function checkWord() {
+      const word = Array.from({ length: 5 }, (_, i) => document.getElementById(`wheel${i}`).value).join('');
+      const result = document.getElementById('result');
+      if (validWords.includes(word)) {
+        result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
+        result.style.color = 'green';
+      } else {
+        result.textContent = `❌ "${word.toUpperCase()}" is not valid.`;
+        result.style.color = 'red';
+      }
+    }
+  </script>
+</body>
+</html>
