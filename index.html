@@ -208,21 +208,57 @@
         updateWheelDisplay(wheelIndex);
       }
 
-      function updateWheelDisplay(wheelIndex) {
-        const letters = wheels[wheelIndex];
-        const display = document.getElementById(`wheel${wheelIndex}`);
-        const index = currentIndexes[wheelIndex];
+     function isTouchDevice() {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
 
-        display.innerHTML = '';
+function updateWheelDisplay(wheelIndex) {
+  const letters = wheels[wheelIndex];
+  const display = document.getElementById(`wheel${wheelIndex}`);
+  const index = currentIndexes[wheelIndex];
 
-        letters.forEach((letter, i) => {
-          const div = document.createElement('div');
-          div.className = 'letter';
-          if (i === index) div.classList.add('selected');
-          div.textContent = letter;
-          display.appendChild(div);
-        });
+  display.innerHTML = '';
+
+  letters.forEach((letter, i) => {
+    const div = document.createElement('div');
+    div.className = 'letter';
+    if (i === index) div.classList.add('selected');
+    div.textContent = letter;
+
+    div.addEventListener('click', () => {
+      currentIndexes[wheelIndex] = i;
+      updateWheelDisplay(wheelIndex);
+      checkWord();
+    });
+
+    display.appendChild(div);
+  });
+
+  if (isTouchDevice()) {
+    display.style.overflowY = 'hidden'; // disable scroll for touch
+    display.onscroll = null; // remove scroll handler
+  } else {
+    display.style.overflowY = 'auto'; // enable scroll for mouse
+    display.onscroll = () => {
+      const scrollTop = display.scrollTop;
+      const letterDivs = Array.from(display.children);
+      const letterHeight = letterDivs[0]?.offsetHeight || 36;
+      const newIndex = Math.round(scrollTop / letterHeight);
+
+      if (newIndex !== currentIndexes[wheelIndex] && newIndex < letters.length) {
+        currentIndexes[wheelIndex] = newIndex;
+        updateWheelDisplay(wheelIndex);
+        checkWord();
       }
+    };
+
+    const selectedDiv = display.children[index];
+    if (selectedDiv) {
+      display.scrollTop = selectedDiv.offsetTop - display.offsetTop;
+    }
+  }
+}
+
 	  
 	   // Format and set today's date
     const dateDisplay = document.getElementById('date-display');
