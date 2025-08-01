@@ -95,6 +95,37 @@
 	  25% { transform: translateX(-5px); }
       75% { transform: translateX(5px); }
     }
+
+#congratsDialog {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border: 2px solid black;
+      border-radius: 10px;
+      z-index: 10;
+      width: 80%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9;
+    }
+    #congratsDialog button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1em;
+    }
   </style>
 </head>
 <body>
@@ -124,8 +155,14 @@
     </div>
   </div>
   
-  <audio id="success-sound" src="yay-6326.mp3" type="audio/mp3" preload="auto" audio.volume=0.5></audio>
+  <audio id="success-sound" src="yay-6326.mp3" type="audio/mp3" preload="auto" audio.volume=0.2></audio>
   <audio id="fail-sound" src="https://actions.google.com/sounds/v1/cartoon/boing.ogg" preload="auto"></audio>
+
+<div id="overlay"></div>
+<div id="congratsDialog">
+    <div id="congratsMessage"></div>
+    <button id="returnBtn">Return to Game</button>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -148,7 +185,17 @@
     const timerDisplay = document.getElementById('timer');
     const successSound = document.getElementById('success-sound');
     const failSound = document.getElementById('fail-sound');
-	const checkBtn = document.getElementById('checkBtn');
+    const checkBtn = document.getElementById('checkBtn');
+
+    const overlay = document.getElementById('overlay');
+      const dialog = document.getElementById('congratsDialog');
+      const message = document.getElementById('congratsMessage');
+      const returnBtn = document.getElementById('returnBtn');
+
+    returnBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        dialog.style.display = 'none';
+      });	    
       
 	  function createWheel(i, letters) {
         const container = document.createElement('div');
@@ -257,17 +304,28 @@ function updateWheelDisplay(wheelIndex) {
       display.scrollTop = selectedDiv.offsetTop - display.offsetTop;
     }
   }
-}
-
-	  
-	   // Format and set today's date
+}	
+function showCongratsDialog() {
+        const extra = validWords.length - goal;
+        if (extra > 0 && foundWords.size < validWords.length) {
+          message.innerHTML = `🎉 You've found ${goal} words! A new puzzle will be available tomorrow.<br><br>There are <strong>${extra}</strong> more words to find. Want to keep playing?`;
+          returnBtn.style.display = 'inline-block';
+        } else {
+          message.innerHTML = `🎉 Congratulations! You've found all ${goal} words! A new puzzle will be available tomorrow.`;
+          returnBtn.style.display = 'none';
+        }
+        overlay.style.display = 'block';
+        dialog.style.display = 'block';
+      }
+	    
+    // Format and set today's date
     const dateDisplay = document.getElementById('date-display');
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric'
     });
     dateDisplay.textContent = formattedDate.toUpperCase();
-
+	    
     // Timer
     let secondsElapsed = 0;
     let timerInterval = setInterval(() => {
