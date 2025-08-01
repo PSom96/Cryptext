@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href='https://fonts.googleapis.com/css?family=Mozilla Headline' rel='stylesheet'>
+  <title>Cryptex Word Puzzle</title>
+  <style>
+    body {
+      font-family:'Mozilla Headline';
+      padding: 18px;
+      background-color: #f7f7f7;
+      text-align: center;
+      overflow-x: hidden;
+    }
+    .game-container {
+      background: white;
+      border: 2px solid teal;
+      border-radius: 12px;
+      padding: 40px 30px;
+      text-align: center;
+      width: 350px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+	 .subtitle {
+      font-size: 0.95em;
+      margin-bottom: 10px;
+    }
+	  .date-display {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .wheels-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+      position: relative;
+      flex-wrap: nowrap;
+    }
+    .wheel-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 5px;
+    }
+    .wheel {
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #222;
+      border-radius: 8px;
+      background-color: white;
+      padding: 10px 0;
+    }
+    .letter {
+      font-size: 1.3em;
+      padding: 5px 0;
+      width: 50px;
+    }
+    .selected {
+      font-weight: bold;
+      background-color: black;
+      color: white;
+      border-radius: 4px;
+    }
+    .selected.correct {
+      background-color: teal;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.3em;
+      font-weight: bold;
+    }
+    #goalCounter {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+	  .bottom-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      font-size: 0.9em;
+    }
+	  .correct-anim {
+      animation: bounce 0.5s ease;
+    }
+      .wrong-anim {
+      animation: shake 0.5s ease;
+    }
+      @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+	  50% { transform: translateY(-10px); }
+    }
+	  @keyframes shake {
+	  0%, 100% { transform: translateX(0); }
+	  25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body>
+   <div class="game-container">
+    <img src="cryptext-title.png" alt="Cryptext Game Title" style="width: 100%; max-width: 300px;" />
+<p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;">Select one letter from each wheel <br> to form 5-letter words.</p>
+
+    <div class="date-display" id="date-display"></div>
+
+  <div class="wheels-wrapper">
+    <div id="wheels" style="display: flex;"></div>
+  </div>
+  
+  <div>
+  <button id="checkBtn" 
+  style="margin-top: 20px; 
+  border: 2px; border-radius: 8px;
+  padding: 10px 20px;
+  background-color: teal;
+  font-size: 1em; color: white">Check</button>
+</div>
+<div id="result"></div>
+  
+    <div class="bottom-row">
+      <div id="goal">Goal: 0/5</div>
+      <div id="timer">Timer: 00:00</div>
+    </div>
+  </div>
+  
+<audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="fail-sound" src="https://actions.google.com/sounds/v1/cartoon/boing.ogg" preload="auto"></audio>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const wheels = [
+        ['E', 'N', 'G', 'I', 'N', 'E'],
+        ['C', 'A', 'P', 'I', 'T', 'A', 'L', 'S'],
+        ['T', 'A', 'S', 'T', 'Y'],
+        ['B', 'R', 'O', 'W', 'N', 'I', 'E'],
+        ['A', 'L', 'M', 'O', 'N', 'D']
+      ];
+
+      const validWords = ['easel', 'nitro', 'gated', 'gland', 'eased'];
+       const goalTarget = 5;
+		let foundWords = new Set();
+		let wordsFound = 0;
+      const wheelsContainer = document.getElementById('wheels');
+      const currentIndexes = wheels.map(() => 0);
+	const result = document.getElementById('result');
+    const goalDisplay = document.getElementById('goal');
+    const timerDisplay = document.getElementById('timer');
+    const successSound = document.getElementById('success-sound');
+    const failSound = document.getElementById('fail-sound');
+	const checkBtn = document.getElementById('checkBtn');
+      
+	  function createWheel(i, letters) {
+        const container = document.createElement('div');
+        container.classList.add('wheel-container');
+
+        const wheelDiv = document.createElement('div');
+        wheelDiv.classList.add('wheel');
+        wheelDiv.id = `wheel${i}`;
+
+        wheelDiv.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          scrollWheel(i, e.deltaY > 0 ? 1 : -1);
+        });
+
+        wheelDiv.addEventListener('mousedown', startDrag);
+        wheelDiv.addEventListener('touchstart', startDrag);
+
+        let startY = null;
+
+        function startDrag(e) {
+          startY = e.touches ? e.touches[0].clientY : e.clientY;
+          const move = (ev) => {
+            const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+            const delta = startY - y;
+            if (Math.abs(delta) > 20) {
+              scrollWheel(i, delta > 0 ? 1 : -1);
+              startY = y;
+            }
+          };
+
+          const stop = () => {
+            window.removeEventListener('mousemove', move);
+            window.removeEventListener('mouseup', stop);
+            window.removeEventListener('touchmove', move);
+            window.removeEventListener('touchend', stop);
+          };
+
+          window.addEventListener('mousemove', move);
+          window.addEventListener('mouseup', stop);
+          window.addEventListener('touchmove', move);
+          window.addEventListener('touchend', stop);
+        }
+
+        container.appendChild(wheelDiv);
+        wheelsContainer.appendChild(container);
+        updateWheelDisplay(i);
+      }
+
+      function renderWheels() {
+        wheelsContainer.innerHTML = '';
+        wheels.forEach((letters, i) => createWheel(i, letters));
+      }
+
+      function scrollWheel(wheelIndex, direction) {
+        const letters = wheels[wheelIndex];
+        currentIndexes[wheelIndex] = (currentIndexes[wheelIndex] + direction + letters.length) % letters.length;
+        updateWheelDisplay(wheelIndex);
+      }
+
+      function updateWheelDisplay(wheelIndex) {
+        const letters = wheels[wheelIndex];
+        const display = document.getElementById(`wheel${wheelIndex}`);
+        const index = currentIndexes[wheelIndex];
+
+        display.innerHTML = '';
+
+        letters.forEach((letter, i) => {
+          const div = document.createElement('div');
+          div.className = 'letter';
+          if (i === index) div.classList.add('selected');
+          div.textContent = letter;
+          display.appendChild(div);
+        });
+      }
+	  
+	   // Format and set today's date
+    const dateDisplay = document.getElementById('date-display');
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    dateDisplay.textContent = formattedDate.toUpperCase();
+
+    // Timer
+    let secondsElapsed = 0;
+    let timerInterval = setInterval(() => {
+      secondsElapsed++;
+      const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+      const secs = String(secondsElapsed % 60).padStart(2, '0');
+      timerDisplay.textContent = `Timer: ${mins}:${secs}`;
+    }, 1000);
+
+ function animateResult(type) {
+      result.classList.remove('correct-anim', 'wrong-anim');
+      void result.offsetWidth; // reflow trick to restart animation
+      if (type === 'correct') {
+        result.classList.add('correct-anim');
+      } else {
+        result.classList.add('wrong-anim');
+      }
+    }
+	
+	 function animateResult(type) {
+      result.classList.remove('correct-anim', 'wrong-anim');
+      void result.offsetWidth; // reflow trick to restart animation
+      if (type === 'correct') {
+        result.classList.add('correct-anim');
+      } else {
+        result.classList.add('wrong-anim');
+      }
+    }
+	   
+	  checkBtn.addEventListener('click', () => {
+      const word = currentIndexes.map((idx, i) => wheels[i][idx].toLowerCase()).join('');
+      const selectedLetters = document.querySelectorAll('.selected');
+      selectedLetters.forEach(el => el.classList.remove('correct'));
+
+      if (validWords.includes(word)) {
+        if (!foundWords.has(word)) {
+          foundWords.add(word);
+          wordsFound++;
+        }
+        goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`;
+        selectedLetters.forEach(el => el.classList.add('correct'));
+        successSound.currentTime = 0;
+        successSound.play();
+        result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
+        result.style.color = 'green';
+        animateResult('correct');
+      } else {
+        failSound.currentTime = 0;
+        failSound.play();
+        result.textContent = `❌ "${word.toUpperCase()}" is not valid.`;
+        result.style.color = 'red';
+		failSound.currentTime = 0;
+        failSound.play();
+        animateResult('wrong');
+      }
+    });
+
+      renderWheels();
+      checkWord();
+    });
+  </script>
+</body>
+</html>
