@@ -148,9 +148,9 @@
     const timerDisplay = document.getElementById('timer');
     const successSound = document.getElementById('success-sound');
     const failSound = document.getElementById('fail-sound');
-	  const checkBtn = document.getElementById('checkBtn');
+    const checkBtn = document.getElementById('checkBtn');
       
-	      function createWheel(i, letters) {
+	function createWheel(i, letters) {
         const container = document.createElement('div');
         container.classList.add('wheel-container');
 
@@ -182,30 +182,33 @@
           if (i === index) div.classList.add('selected');
           div.textContent = letter;
 
-	// Tap to select
           div.addEventListener('click', () => {
             currentIndexes[wheelIndex] = i;
             updateWheelDisplay(wheelIndex);
             checkWord();
           });
+
           display.appendChild(div);
         });
 
-	//scroll-to-select for desktop
-	display.onscroll = () => {
-    const letterDivs = Array.from(display.children);
-    const scrollTop = display.scrollTop;
-    const letterHeight = letterDivs[0]?.offsetHeight || 36;
-    const newIndex = Math.round(scrollTop / letterHeight);
+        display.onscroll = () => {
+          const scrollTop = display.scrollTop;
+          const letterDivs = Array.from(display.children);
+          const letterHeight = letterDivs[0]?.offsetHeight || 36;
+          const newIndex = Math.round(scrollTop / letterHeight);
 
-    if (newIndex !== currentIndexes[wheelIndex] && newIndex < letters.length) {
-      currentIndexes[wheelIndex] = newIndex;
-      updateWheelDisplay(wheelIndex);
-      checkWord();
-    }
-display.appendChild(div);
-};
-}
+          if (newIndex !== currentIndexes[wheelIndex] && newIndex < letters.length) {
+            currentIndexes[wheelIndex] = newIndex;
+            updateWheelDisplay(wheelIndex);
+            checkWord();
+          }
+        };
+
+        const selectedDiv = display.children[index];
+        if (selectedDiv) {
+          display.scrollTop = selectedDiv.offsetTop - display.offsetTop;
+        }
+      }
 				}
 
       function renderWheels() {
