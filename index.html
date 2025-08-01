@@ -130,27 +130,27 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const wheels = [
-        ['H', 'E', 'I', 'S', 'T',],
-        ['E', 'M', 'P', 'I', 'R', 'E'],
-        ['A', 'L', 'L', 'O', 'Y', 'S'],
-        ['R', 'E', 'B', 'E', 'L'],
-        ['I', 'N', 'F', 'I', 'N', 'I', 'T', 'Y']
+        ['E', 'N', 'G', 'I', 'N', 'E'],
+        ['C', 'A', 'P', 'I', 'T', 'A', 'L', 'S'],
+        ['T', 'A', 'S', 'T', 'Y'],
+        ['B', 'R', 'O', 'W', 'N', 'I', 'E'],
+        ['A', 'L', 'M', 'O', 'N', 'D']
       ];
 
-    const validWords = ['heart', 'sport', 'smart', 'hilly', 'silly', 'teary'];
-    const goalTarget = 5;
+      const validWords = ['easel', 'nitro', 'gated', 'gland', 'eased'];
+       const goalTarget = 5;
 		let foundWords = new Set();
 		let wordsFound = 0;
-    const wheelsContainer = document.getElementById('wheels');
-    const currentIndexes = wheels.map(() => 0);
-	  const result = document.getElementById('result');
+      const wheelsContainer = document.getElementById('wheels');
+      const currentIndexes = wheels.map(() => 0);
+	const result = document.getElementById('result');
     const goalDisplay = document.getElementById('goal');
     const timerDisplay = document.getElementById('timer');
     const successSound = document.getElementById('success-sound');
     const failSound = document.getElementById('fail-sound');
-    const checkBtn = document.getElementById('checkBtn');
+	const checkBtn = document.getElementById('checkBtn');
       
-	function createWheel(i, letters) {
+	  function createWheel(i, letters) {
         const container = document.createElement('div');
         container.classList.add('wheel-container');
 
@@ -158,66 +158,45 @@
         wheelDiv.classList.add('wheel');
         wheelDiv.id = `wheel${i}`;
 
+        wheelDiv.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          scrollWheel(i, e.deltaY > 0 ? 1 : -1);
+        });
+
+        wheelDiv.addEventListener('mousedown', startDrag);
+        wheelDiv.addEventListener('touchstart', startDrag);
+
+        let startY = null;
+
+        function startDrag(e) {
+          startY = e.touches ? e.touches[0].clientY : e.clientY;
+          const move = (ev) => {
+            const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+            const delta = startY - y;
+            if (Math.abs(delta) > 20) {
+              scrollWheel(i, delta > 0 ? 1 : -1);
+              startY = y;
+            }
+          };
+
+          const stop = () => {
+            window.removeEventListener('mousemove', move);
+            window.removeEventListener('mouseup', stop);
+            window.removeEventListener('touchmove', move);
+            window.removeEventListener('touchend', stop);
+          };
+
+          window.addEventListener('mousemove', move);
+          window.addEventListener('mouseup', stop);
+          window.addEventListener('touchmove', move);
+          window.addEventListener('touchend', stop);
+        }
+
         container.appendChild(wheelDiv);
         wheelsContainer.appendChild(container);
-
         updateWheelDisplay(i);
       }
 
-      function renderWheels() {
-        wheelsContainer.innerHTML = '';
-        wheels.forEach((letters, i) => createWheel(i, letters));
-      }
-
-      function updateWheelDisplay(wheelIndex) {
-  const letters = wheels[wheelIndex];
-  const display = document.getElementById(`wheel${wheelIndex}`);
-  const index = currentIndexes[wheelIndex];
-
-  display.innerHTML = '';
-
-  letters.forEach((letter, i) => {
-    const div = document.createElement('div');
-    div.className = 'letter';
-    if (i === index) div.classList.add('selected');
-    div.textContent = letter;
-
-    div.addEventListener('click', () => {
-      currentIndexes[wheelIndex] = i;
-      updateWheelDisplay(wheelIndex);
-      checkWord();
-    });
-
-    display.appendChild(div);
-  });
-
-  // Update selected state and scroll to that letter
-  const selectedDiv = display.children[index];
-  if (selectedDiv) {
-    // Scroll only if using a mouse (not touch)
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    if (!isTouch) {
-      display.scrollTop = selectedDiv.offsetTop - display.offsetTop;
-    }
-  }
-
-  display.onscroll = () => {
-    // Throttle scroll behavior for smoother update
-    clearTimeout(display._scrollTimeout);
-    display._scrollTimeout = setTimeout(() => {
-      const scrollTop = display.scrollTop;
-      const letterDivs = Array.from(display.children);
-      const letterHeight = letterDivs[0]?.offsetHeight || 36;
-      const newIndex = Math.round(scrollTop / letterHeight);
-
-      if (newIndex !== currentIndexes[wheelIndex] && newIndex < letters.length) {
-        currentIndexes[wheelIndex] = newIndex;
-        updateWheelDisplay(wheelIndex);
-        checkWord();
-      }
-    }, 100); // Delay for smoother scroll update
-  };
-}
       function renderWheels() {
         wheelsContainer.innerHTML = '';
         wheels.forEach((letters, i) => createWheel(i, letters));
