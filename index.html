@@ -95,8 +95,7 @@
 	  25% { transform: translateX(-5px); }
       75% { transform: translateX(5px); }
     }
-
-#congratsDialog {
+    #congratsDialog {
       display: none;
       position: fixed;
       top: 50%;
@@ -306,9 +305,9 @@ function updateWheelDisplay(wheelIndex) {
   }
 }	
 function showCongratsDialog() {
-        const extra = validWords.length - goal;
-        if (extra > 0 && foundWords.size < validWords.length) {
-          message.innerHTML = `🎉 You've found ${goal} words! A new puzzle will be available tomorrow.<br><br>There are <strong>${extra}</strong> more words to find. Want to keep playing?`;
+        const remaining = validWords.length - foundWords.size;
+        if (remaining > 0) {
+          message.innerHTML = `🎉 You've found ${goal} words! A new puzzle will be available tomorrow.<br><br>There are <strong>${remaining}</strong> more words to find. Want to keep playing?`;
           returnBtn.style.display = 'inline-block';
         } else {
           message.innerHTML = `🎉 Congratulations! You've found all ${goal} words! A new puzzle will be available tomorrow.`;
@@ -345,7 +344,7 @@ function showCongratsDialog() {
       }
     }
 	
-	 function animateResult(type) {
+  function animateResult(type) {
       result.classList.remove('correct-anim', 'wrong-anim');
       void result.offsetWidth; // reflow trick to restart animation
       if (type === 'correct') {
@@ -354,9 +353,9 @@ function showCongratsDialog() {
         result.classList.add('wrong-anim');
       }
     }
-	   
 	  checkBtn.addEventListener('click', () => {
       const word = currentIndexes.map((idx, i) => wheels[i][idx].toLowerCase()).join('');
+      const result = document.getElementById('result');
       const selectedLetters = document.querySelectorAll('.selected');
       selectedLetters.forEach(el => el.classList.remove('correct'));
 
@@ -364,6 +363,7 @@ function showCongratsDialog() {
         if (!foundWords.has(word)) {
           foundWords.add(word);
           wordsFound++;
+	  document.getElementById('goal').textContent = foundWords.size;
         }
         goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`;
         selectedLetters.forEach(el => el.classList.add('correct'));
@@ -372,6 +372,10 @@ function showCongratsDialog() {
         result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
         result.style.color = 'green';
         animateResult('correct');
+	
+	if (foundWords.size === goal) {
+            setTimeout(showCongratsDialog, 200); // highlight change: added delay to ensure UI updates
+          }
       } else {
         failSound.currentTime = 0;
         failSound.play();
