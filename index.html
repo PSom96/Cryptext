@@ -170,47 +170,54 @@
       }
 
       function updateWheelDisplay(wheelIndex) {
-        const letters = wheels[wheelIndex];
-        const display = document.getElementById(`wheel${wheelIndex}`);
-        const index = currentIndexes[wheelIndex];
+  const letters = wheels[wheelIndex];
+  const display = document.getElementById(`wheel${wheelIndex}`);
+  const index = currentIndexes[wheelIndex];
 
-        display.innerHTML = '';
+  display.innerHTML = '';
 
-        letters.forEach((letter, i) => {
-          const div = document.createElement('div');
-          div.className = 'letter';
-          if (i === index) div.classList.add('selected');
-          div.textContent = letter;
+  letters.forEach((letter, i) => {
+    const div = document.createElement('div');
+    div.className = 'letter';
+    if (i === index) div.classList.add('selected');
+    div.textContent = letter;
 
-          div.addEventListener('click', () => {
-            currentIndexes[wheelIndex] = i;
-            updateWheelDisplay(wheelIndex);
-            checkWord();
-          });
+    div.addEventListener('click', () => {
+      currentIndexes[wheelIndex] = i;
+      updateWheelDisplay(wheelIndex);
+      checkWord();
+    });
 
-          display.appendChild(div);
-        });
+    display.appendChild(div);
+  });
 
-        display.onscroll = () => {
-          const scrollTop = display.scrollTop;
-          const letterDivs = Array.from(display.children);
-          const letterHeight = letterDivs[0]?.offsetHeight || 36;
-          const newIndex = Math.round(scrollTop / letterHeight);
+  // Update selected state and scroll to that letter
+  const selectedDiv = display.children[index];
+  if (selectedDiv) {
+    // Scroll only if using a mouse (not touch)
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (!isTouch) {
+      display.scrollTop = selectedDiv.offsetTop - display.offsetTop;
+    }
+  }
 
-          if (newIndex !== currentIndexes[wheelIndex] && newIndex < letters.length) {
-            currentIndexes[wheelIndex] = newIndex;
-            updateWheelDisplay(wheelIndex);
-            checkWord();
-          }
-        };
+  display.onscroll = () => {
+    // Throttle scroll behavior for smoother update
+    clearTimeout(display._scrollTimeout);
+    display._scrollTimeout = setTimeout(() => {
+      const scrollTop = display.scrollTop;
+      const letterDivs = Array.from(display.children);
+      const letterHeight = letterDivs[0]?.offsetHeight || 36;
+      const newIndex = Math.round(scrollTop / letterHeight);
 
-        const selectedDiv = display.children[index];
-        if (selectedDiv) {
-          display.scrollTop = selectedDiv.offsetTop - display.offsetTop;
-        }
+      if (newIndex !== currentIndexes[wheelIndex] && newIndex < letters.length) {
+        currentIndexes[wheelIndex] = newIndex;
+        updateWheelDisplay(wheelIndex);
+        checkWord();
       }
-				}
-
+    }, 100); // Delay for smoother scroll update
+  };
+}
       function renderWheels() {
         wheelsContainer.innerHTML = '';
         wheels.forEach((letters, i) => createWheel(i, letters));
