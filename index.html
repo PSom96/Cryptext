@@ -353,39 +353,56 @@ function showCongratsDialog() {
         result.classList.add('wrong-anim');
       }
     }
-	  checkBtn.addEventListener('click', () => {
-      const word = currentIndexes.map((idx, i) => wheels[i][idx].toLowerCase()).join('');
-      const result = document.getElementById('result');
-      const selectedLetters = document.querySelectorAll('.selected');
-      selectedLetters.forEach(el => el.classList.remove('correct'));
 
-      if (validWords.includes(word)) {
-        if (!foundWords.has(word)) {
-          foundWords.add(word);
-          wordsFound++;
-	  document.getElementById('goal').textContent = foundWords.size;
-        }
-        goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`;
-        selectedLetters.forEach(el => el.classList.add('correct'));
-        successSound.currentTime = 0;
-        successSound.play();
-        result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
-        result.style.color = 'green';
-        animateResult('correct');
-	
-	if (foundWords.size === goal) {
-            setTimeout(showCongratsDialog, 200); // highlight change: added delay to ensure UI updates
-          }
-      } else {
-        failSound.currentTime = 0;
-        failSound.play();
-        result.textContent = `❌ "${word.toUpperCase()}" is not valid.`;
-        result.style.color = 'red';
-		failSound.currentTime = 0;
-        failSound.play();
-        animateResult('wrong');
-      }
-    });
+	    
+// HIGHLIGHT: Separated out checkWord() to allow re-use
+function checkWord() {
+  const word = currentIndexes.map((idx, i) => wheels[i][idx].toLowerCase()).join('');
+  const selectedLetters = document.querySelectorAll('.selected');
+  selectedLetters.forEach(el => el.classList.remove('correct'));
+
+  if (validWords.includes(word)) {
+    if (!foundWords.has(word)) {
+      foundWords.add(word);
+      wordsFound++;
+      goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`; // HIGHLIGHT
+    }
+    selectedLetters.forEach(el => el.classList.add('correct'));
+    successSound.currentTime = 0;
+    successSound.play();
+    result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
+    result.style.color = 'green';
+    animateResult('correct');
+
+    if (wordsFound === goalTarget) {
+      setTimeout(showCongratsDialog, 300); // HIGHLIGHT: Trigger dialog correctly
+    }
+  } else {
+    failSound.currentTime = 0;
+    failSound.play();
+    result.textContent = `❌ "${word.toUpperCase()}" is not valid.`;
+    result.style.color = 'red';
+    animateResult('wrong');
+  }
+}
+
+// HIGHLIGHT: Corrected variable 'goal' to 'goalTarget'
+function showCongratsDialog() {
+  const remaining = validWords.length - foundWords.size;
+  if (remaining > 0) {
+    message.innerHTML = `🎉 You've found ${goalTarget} words!<br><br>A new puzzle will be available tomorrow.<br><br>There are <strong>${remaining}</strong> more words to find. Want to keep playing?`;
+    returnBtn.style.display = 'inline-block';
+  } else {
+    message.innerHTML = `🎉 Congratulations! You've found all ${goalTarget} words!<br><br>A new puzzle will be available tomorrow.`;
+    returnBtn.style.display = 'none';
+  }
+  overlay.style.display = 'block';
+  dialog.style.display = 'block';
+}
+
+// HIGHLIGHT: Use button to call checkWord directly
+checkBtn.addEventListener('click', checkWord);
+
 
       renderWheels();
       checkWord();
