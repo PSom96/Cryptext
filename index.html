@@ -182,7 +182,7 @@
           if (i === index) div.classList.add('selected');
           div.textContent = letter;
 
-					// Tap to select
+	// Tap to select
           div.addEventListener('click', () => {
             currentIndexes[wheelIndex] = i;
             updateWheelDisplay(wheelIndex);
@@ -191,8 +191,8 @@
           display.appendChild(div);
         });
 
-				//scroll-to-select for desktop
-				 display.onscroll = () => {
+	//scroll-to-select for desktop
+	display.onscroll = () => {
     const letterDivs = Array.from(display.children);
     const scrollTop = display.scrollTop;
     const letterHeight = letterDivs[0]?.offsetHeight || 36;
@@ -203,14 +203,9 @@
       updateWheelDisplay(wheelIndex);
       checkWord();
     }
-  };
-
-  // Center the selected letter in view
-  const selectedDiv = display.children[index];
-  if (selectedDiv) {
-    display.scrollTop = selectedDiv.offsetTop - display.offsetTop;
- 		}
-	}
+display.appendChild(div);
+};
+}
 				}
 
       function renderWheels() {
