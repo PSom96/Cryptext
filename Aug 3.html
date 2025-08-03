@@ -267,6 +267,15 @@
                 const dateDisplay = document.getElementById('dateDisplay');
                 dateDisplay.textContent = 'AUGUST 3, 2025';
 
+	     // Timer
+            let secondsElapsed = 0;
+            let timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerDisplay.textContent = `Timer: ${mins}:${secs}`;
+                }, 1000);
+
             function checkWord() {
 		        const word = currentIndexes.map((idx, i) => wheel[i][idx].toLowerCase()).join('');
 		        const selectedLetters = document.querySelectorAll('.selected');
@@ -320,4 +329,5 @@
     });
     </script>
     </body>
+
 </html>
