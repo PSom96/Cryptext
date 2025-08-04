@@ -1,0 +1,334 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title> Cryptext Word Puzzle </title>
+        <style>
+            @font-face {
+                font-family: 'Neoneon';
+                src: 
+                    url("fonts/Neoneon.woff2") format('woff2'),
+                    url("fonts/Neoneon.woff") format('woff');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+            }
+            h1.gameTitle {
+                font-family: "Neoneon";
+                font-size: 3rem;
+                color: #188678;
+                text-align: center;
+                margin: 1em 0;
+            }
+            body {
+                font-family: monospace;
+                padding: 18px;
+                background-color: rgb(248, 243, 237);
+                text-align: center;
+                overflow-x: hidden;
+            }
+            .gameContainer {
+                background-color: bisque;
+                border: 2px solid teal;
+                border-radius: 12px;
+                padding: 40px 30px;
+                text-align: center;
+                width: 350px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            }
+            .subtitle {
+                font-size: 1em;
+                margin-bottom: 10px;
+            }
+            .dateDisplay {
+                font-weight: bold;
+            }
+            .triangleArrowLeft {
+                display: inline-block;
+                width: 0;
+                height: 0;
+                border-top: 10px solid transparent;
+                border-bottom: 10px solid transparent;
+                border-right: 10px solid teal;
+                cursor: pointer;
+                margin-right: 10px;
+                vertical-align: middle;
+            }
+            .triangleArrowRight {
+                display: inline-block;
+                width: 0;
+                height: 0;
+                border-top: 10px solid transparent;
+                border-bottom: 10px solid transparent;
+                border-left: 10px solid teal;
+                cursor: pointer;
+                margin-left: 10px;
+                vertical-align: middle;
+            }
+            .dateRow {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 20px;
+            }          
+            .wheelsWrapper {
+                display: flex;
+                justify-content: center;
+                margin-top: 40px;
+                position: relative;
+                flex-wrap: nowrap;
+            }
+            .wheelContainer {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin: 0 5px;
+            }
+            .wheel {
+                display: flex;
+                flex-direction: column;
+                border: 2px solid #222;
+                border-radius: 8px;
+                background-color: white;
+                padding: 10px 0;
+            }
+            .letter {
+                font-size: 1em;
+                padding: 5px 0;
+                width: 50px;
+            }
+            .selected {
+                font-weight: bold;
+                background-color: black;
+                color: white;
+            }
+            .selected.correct {
+                background-color: teal;
+            }
+            #result {
+                margin-top: 20px;
+                font-size: 0.75em;
+                font-weight: lighter;
+            }
+            #goalCounter {
+                font-size: 1.2em;
+                margin: 10px 0;
+            }
+            .bottomRow {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 20px;
+                font-size: 1em;
+            }
+            #congratsDialog {
+                display: none;
+                position: fixed;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: whitesmoke; 
+                padding: 20px;
+                border: 2px solid black; border-radius: 10px;
+                z-index: 10px;
+                width: 80%;
+                max-width: 400px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            }
+            #overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100vw; height: 100vh;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 9;
+            }
+            #congratsDialog button {
+                margin-top: 15px;
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+        </style>
+    </head>
+    <body> 
+    <div class="gameContainer">
+    <h1 class="gameTitle"> Cryptext </h1>
+    <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;"> Select one letter from each wheel <br> to form 5-letter words. </p>
+
+    <div class="dateRow">
+        <span id="leftArrow" class="triangleArrowLeft"></span>
+        <span class="dateDisplay" id="dateDisplay"></span>
+        <span id="rightArrow" class="triangleArrowRight"></span>
+    </div>
+    
+    <div class="wheelsWrapper">
+        <div id="wheel" style="display: flex"> </div>
+    </div>
+
+    <div>
+        <button id="checkButton" 
+        style="margin-top: 20px; border: 2px; border-radius: 8px; padding: 10px 20px; background-color: teal; font-size: 1em; color: white"> Check </button>
+    </div>
+
+    <div id="result"> </div>
+
+    <div class="bottomRow">
+        <div id="goalTarget"> Goal: 0/10 </div>
+        <div id="timer">Timer: 00:00 </div>
+    </div>
+    </div>
+
+    <div id="overlay"></div>
+    <div id="congratsDialog">
+        <div id="congratsMessage"></div>
+        <button id="returnButton">Return to Game</button>
+    </div>
+
+    <script>
+        document.addEventListener ("DOMContentLoaded", () => {
+            const wheel = [
+                ['F', 'E', 'T', 'C', 'H'],
+                ['L', 'E', 'A', 'S', 'H'],
+                ['T', 'R', 'E', 'A', 'T', 'S'],
+                ['T', 'R', 'A', 'I', 'N'],
+                ['G', 'R', 'E', 'E', 'T']
+            ];
+
+            const validWords = ['charr', 'chart', 'eerie', 'taste', 'there', 'clear', 'chant', 'haste', 'flare', 'carte', 'their', 'cleat', 'cheat', 'flair', 'chair', 'caste', 'clang', 'terne', 'elate', 'heart', 'carat'];
+            const goalTarget = 10;
+                let foundWords = new Set ();
+                let wordsFound = 0;
+            const wheelContainer = document.getElementById('wheel');
+            const currentIndexes = wheel.map(() => 0);
+	        const result = document.getElementById('result');
+            const goalDisplay = document.getElementById('goalTarget');
+            const timerDisplay = document.getElementById('timer');
+            const checkButton = document.getElementById('checkButton');
+
+            const overlay = document.getElementById('overlay');
+            const dialog = document.getElementById('congratsDialog');
+            const message = document.getElementById('congratsMessage');
+            const returnButton = document.getElementById('returnButton');
+
+            returnButton.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            dialog.style.display = 'none';
+            });	
+
+            function createWheel (i, letters) {
+                const container = document.createElement('div');
+                container.classList.add('wheel-container');
+
+                const wheelDiv = document.createElement('div');
+                wheelDiv.classList.add('wheel');
+                wheelDiv.id = `wheel${i}`;
+
+                wheelDiv.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                scrollWheel(i, e.deltaY > 0 ? 1 : -1);
+                });    
+
+            container.appendChild(wheelDiv);
+            wheelContainer.appendChild(container);
+            updateWheelDisplay(i);
+            }
+
+            function renderWheels () {
+                wheelContainer.innerHTML = '';
+                wheel.forEach((letters, i) => createWheel(i, letters));
+            }
+
+            function scrollWheel(wheelIndex, direction) {
+                const letters = wheel[wheelIndex];
+                currentIndexes[wheelIndex] = (currentIndexes[wheelIndex] + direction + letters.length) % letters.length;
+                updateWheelDisplay(wheelIndex);
+            }
+
+            function updateWheelDisplay(wheelIndex) {
+                const letters = wheel[wheelIndex];
+                const display = document.getElementById(`wheel${wheelIndex}`);
+                const index = currentIndexes[wheelIndex];
+
+                display.innerHTML = '';
+
+                letters.forEach((letter, i) => {
+                const div = document.createElement('div');
+                div.className = 'letter';
+                if (i === index) div.classList.add('selected');
+                div.textContent = letter;
+
+                div.addEventListener('click', () => {
+                currentIndexes[wheelIndex] = i;
+                updateWheelDisplay(wheelIndex);
+                });
+                display.appendChild(div);
+                })
+            }
+
+             // Set constant date display
+                const dateDisplay = document.getElementById('dateDisplay');
+                dateDisplay.textContent = 'AUGUST 4, 2025';
+
+            function checkWord() {
+		        const word = currentIndexes.map((idx, i) => wheel[i][idx].toLowerCase()).join('');
+		        const selectedLetters = document.querySelectorAll('.selected');
+		        selectedLetters.forEach(el => el.classList.remove('correct'));
+
+                if (validWords.includes(word)) {
+                    if (!foundWords.has(word)) {
+                    foundWords.add(word);
+                    wordsFound++;
+                    goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`; // HIGHLIGHT
+                    }
+                    selectedLetters.forEach(el => el.classList.add('correct'));
+                    result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
+                    result.style.color = 'green';
+
+                if (wordsFound === goalTarget) {
+                setTimeout(showCongratsDialog, 300); // HIGHLIGHT: Trigger dialog correctly
+                }
+                } else {
+                    result.textContent = `❌ "${word.toUpperCase()}" is not valid.`;
+                    result.style.color = 'red';
+                }
+                }
+    
+            function showCongratsDialog() {
+                const remaining = validWords.length - foundWords.size;
+                
+                if (remaining > 0) {
+                    message.innerHTML = `🎉 You've found ${goalTarget} words! A new puzzle will be available tomorrow.<br><br>There are <strong>${remaining}</strong> more words to find. Want to keep playing?`;
+                    returnButton.style.display = 'inline-block';
+                } else {
+                    message.innerHTML = `🎉 Congratulations! You've found all ${goalTarget} words! A new puzzle will be available tomorrow.`;
+                    returnButton.style.display = 'none';
+                }
+                overlay.style.display = 'block';
+                dialog.style.display = 'block';
+            }
+
+            document.getElementById('leftArrow').addEventListener('click', () => {
+            window.location.href = 'Aug 3.html';
+            });
+            
+            //document.getElementById('rightArrow').addEventListener('click', () => {
+            //window.location.href = 'Aug 3.html';
+            //});
+
+            checkButton.addEventListener('click', checkWord); 
+
+	    // Timer
+            let secondsElapsed = 0;
+            let timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerDisplay.textContent = `Timer: ${mins}:${secs}`;
+                }, 1000);
+            
+            renderWheels();
+
+    });
+    </script>
+    </body>
+
+</html>
+
