@@ -26,6 +26,8 @@
                 background-color: rgb(248, 243, 237);
                 text-align: center;
                 overflow-x: hidden;
+		overscroll-behavior-y: contain;
+                touch-action: manipulation;
             }
             .gameContainer {
                 background-color: bisque;
@@ -95,7 +97,7 @@
                 align-items: center;
                 margin: 0 5px;
 		height: 250px;
-                width: 50px;            /* Each wheel gets its own width */
+                width: 70px;            /* Each wheel gets its own width */
                 overflow: visible;      /* Allow overflow for the wheel to scroll */
                 position: relative;
             }
@@ -109,12 +111,13 @@
 		position: absolute;
                 left: 0;
                 right: 0;
-                width: 50px;         /* Match wheelContainer width */
+                width: 70px;         /* Match wheelContainer width */
                 transition: top 0.2s;
                 box-sizing: border-box; /* ensures border is included in width/height */
             }
             .letter {
                 height: 40px;
+		width: 40px;
     		line-height: 40px;
     		font-size: 1.2em;
     		text-align: center;
@@ -271,6 +274,7 @@
                 });
                 document.addEventListener('touchmove', (e) => {
                     if (!dragging) return;
+		    e.preventDefault(); // Prevent page from scrolling!
                     const deltaY = e.touches[0].clientY - startY;
                     wheelDiv.style.top = `${currentTop + deltaY}px`;
                 });
