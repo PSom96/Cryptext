@@ -22,12 +22,17 @@
             }
             body {
                 font-family: monospace;
-                padding: 18px;
                 background-color: rgb(248, 243, 237);
                 text-align: center;
                 overflow-x: hidden;
 		overscroll-behavior-y: contain;
                 touch-action: manipulation;
+		min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                margin: 0;
             }
             .gameContainer {
                 background-color: bisque;
@@ -82,6 +87,7 @@
             }
 	    #wheel {                 /*#wheel is the container for all wheels*/ 
                 display: flex;
+		touch-action: none;
                 position: relative;
                 height: 250px;
                 width: auto;         /* Allow it to grow to fit all wheels */
@@ -94,6 +100,7 @@
             .wheelContainer {
                 display: flex;
                 flex-direction: column;
+		touch-action: none;
                 align-items: center;
                 margin: 0 5px;
 		        height: 250px;
