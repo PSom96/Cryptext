@@ -313,17 +313,21 @@
                 display.innerHTML = '';
 
                 letters.forEach((letter, i) => {
-                const div = document.createElement('div');
-                div.className = 'letter';
-                if (i === index) div.classList.add('selected');
-                div.textContent = letter;
-
-                div.addEventListener('click', () => {
-                currentIndexes[wheelIndex] = i;
-                updateWheelDisplay(wheelIndex);
+                    const div = document.createElement('div');
+                    div.className = 'letter';
+                    div.style.color = i === index ? 'black' : '#bbb';
+                    div.style.fontWeight = i === index ? 'bold' : 'normal';
+                    div.style.background = i === index ? '#eee' : 'transparent';
+                    div.style.textAlign = 'center';
+                    div.style.height = '40px'; // px, adjust as needed
+                    div.style.lineHeight = '40px';
+                    if (i === index) div.classList.add('selected');
+                    div.textContent = letter;
+                    display.appendChild(div);
                 });
-                display.appendChild(div);
-                })
+
+                // Center the selected letter visually
+                display.style.top = `${-index * 40 + 80}px`; // 80px centers the selected letter, adjust as needed
             }
 
              // Set constant date display
