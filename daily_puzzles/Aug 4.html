@@ -23,7 +23,6 @@
             body {
                 font-family: monospace;
                 background-color: rgb(248, 243, 237);
-                text-align: center;
                 overflow-x: hidden;
 		overscroll-behavior-y: contain;
                 touch-action: manipulation;
@@ -31,8 +30,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 10px 10px;
-                margin: 5 5;
+                text-align: center;
             }
             .gameContainer {
                 background-color: bisque;
@@ -40,7 +38,7 @@
                 border-radius: 12px;
                 padding: 40px 30px;
                 text-align: center;
-                width: 350px;
+                max-width: 350px;
                 box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             }
             .subtitle {
@@ -103,7 +101,7 @@
 		touch-action: none;
                 align-items: center;
                 margin: 0 5px;
-		        height: 250px;
+		height: 250px;
                 width: 50px;            /* Each wheel gets its own width */
                 overflow: visible;      /* Allow overflow for the wheel to scroll */
                 position: relative;
@@ -124,7 +122,7 @@
             }
             .letter {
                 height: 40px;
-		width: 50px;
+		width: 46px;
     		line-height: 40px;
     		font-size: 1.2em;
     		text-align: center;
