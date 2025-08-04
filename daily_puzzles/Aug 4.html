@@ -267,29 +267,30 @@
                 let dragging = false;
 
                 // Touch events
+                let touchStartY = null;
+
                 wheelDiv.addEventListener('touchstart', (e) => {
-                    dragging = true;
-                    startY = e.touches[0].clientY;
-                    wheelDiv.style.transition = 'none';
+                    if (e.touches.length === 1) {
+                        touchStartY = e.touches[0].clientY;
+                    }
                 });
-                document.addEventListener('touchmove', (e) => {
-                    if (!dragging) return;
-		    e.preventDefault(); // Prevent page from scrolling!
-                    const deltaY = e.touches[0].clientY - startY;
-                    wheelDiv.style.top = `${currentTop + deltaY}px`;
-                });
-                document.addEventListener('touchend', (e) => {
-                    if (!dragging) return;
-                    dragging = false;
-                    const deltaY = e.changedTouches[0].clientY - startY;
-                    const letterHeight = 40;
-                    let move = Math.round(-deltaY / letterHeight);
-                    let newIndex = (currentIndexes[i] + move + letters.length) % letters.length;
-                    currentIndexes[i] = newIndex;
-                    wheelDiv.style.transition = 'top 0.2s';
-                    wheelDiv.style.top = '0px';
-                    currentTop = 0;
-                    updateWheelDisplay(i);
+
+                wheelDiv.addEventListener('touchend', (e) => {
+                    if (touchStartY === null) return;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const deltaY = touchEndY - touchStartY;
+                    const threshold = 30; // Minimum swipe distance in px
+
+                    if (deltaY < -threshold) {
+                        // Swipe up: previous letter
+                        currentIndexes[i] = (currentIndexes[i] - 1 + letters.length) % letters.length;
+                        updateWheelDisplay(i);
+                    } else if (deltaY > threshold) {
+                        // Swipe down: next letter
+                        currentIndexes[i] = (currentIndexes[i] + 1) % letters.length;
+                        updateWheelDisplay(i);
+                    }
+                    touchStartY = null;
                 });
 
                 // Mouse wheel scroll to move selection
