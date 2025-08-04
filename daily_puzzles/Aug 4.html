@@ -96,7 +96,7 @@
                 flex-direction: column;
                 align-items: center;
                 margin: 0 5px;
-		height: 250px;
+		        height: 250px;
                 width: 50px;            /* Each wheel gets its own width */
                 overflow: visible;      /* Allow overflow for the wheel to scroll */
                 position: relative;
@@ -108,7 +108,7 @@
                 border-radius: 8px;
                 background-color: white;
                 padding: 10px 0;
-		position: absolute;
+		        position: absolute;
                 left: 0;
                 right: 0;
                 width: 50px;         /* Match wheelContainer width */
@@ -117,12 +117,12 @@
             }
             .letter {
                 height: 40px;
-		width: 40px;
-    		line-height: 40px;
-    		font-size: 1.2em;
-    		text-align: center;
-    		color: #bbb;
-    		background: transparent;
+		        width: 45px;
+    		    line-height: 40px;
+    		    font-size: 1.2em;
+    		    text-align: center;
+    		    color: #bbb;
+    		    background: transparent;
             }
             .letter.selected {
                 color: black;
@@ -279,8 +279,8 @@
                     if (touchStartY === null) return;
                     const touchEndY = e.changedTouches[0].clientY;
                     const deltaY = touchEndY - touchStartY;
-                    const threshold = 40; // Minimum swipe distance in px
-		    const threshold = 20; // Lower threshold for more sensitivity
+                    const letterHeight = 40; // Minimum swipe distance in px
+		            const threshold = 20; // Lower threshold for more sensitivity
 
                      // Calculate how many letters to move based on swipe distance
                     let move = Math.round(-deltaY / letterHeight);
