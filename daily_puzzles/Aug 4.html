@@ -114,14 +114,17 @@
                 box-sizing: border-box; /* ensures border is included in width/height */
             }
             .letter {
-                font-size: 1em;
-                padding: 5px 0;
-                width: 50px;
+                height: 40px;
+    		line-height: 40px;
+    		font-size: 1.2em;
+    		text-align: center;
+    		color: #bbb;
+    		background: transparent;
             }
-            .selected {
-                font-weight: bold;
-                background-color: black;
-                color: white;
+            .letter.selected {
+                color: black;
+    		font-weight: bold;
+    		background: #eee;
             }
             .selected.correct {
                 background-color: teal;
