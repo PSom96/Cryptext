@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Today's Cryptext Puzzle</title>
+  <script>
+    // Get today's date
+    const today = new Date();
+    // Format month name
+    const monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    const month = monthNames[today.getMonth()];
+    const day = today.getDate();
+    // Build file name (adjust as needed)
+    const fileName = `${month} ${day}.html`;
+    // Redirect
+    window.location.href = fileName;
+  </script>
+</head>
+<body>
+  <p>Redirecting to today's puzzle...</p>
+</body>
+</html>
