@@ -268,22 +268,25 @@
                 dateDisplay.textContent = 'AUGUST 4, 2025';
 
             function checkWord() {
-		        const word = currentIndexes.map((idx, i) => wheel[i][idx].toLowerCase()).join('');
-		        const selectedLetters = document.querySelectorAll('.selected');
-		        selectedLetters.forEach(el => el.classList.remove('correct'));
+                const word = currentIndexes.map((idx, i) => wheel[i][idx].toLowerCase()).join('');
+                const selectedLetters = document.querySelectorAll('.selected');
+                selectedLetters.forEach(el => el.classList.remove('correct'));
 
                 if (validWords.includes(word)) {
-                    if (!foundWords.has(word)) {
+                if (foundWords.has(word)) {
+                    result.textContent = `🙂 "${word.toUpperCase()}" has already been found!`;
+                    result.style.color = 'blue';
+                } else {
                     foundWords.add(word);
                     wordsFound++;
-                    goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`; // HIGHLIGHT
-                    }
+                    goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`;
                     selectedLetters.forEach(el => el.classList.add('correct'));
                     result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
                     result.style.color = 'green';
 
                 if (wordsFound === goalTarget) {
-                setTimeout(showCongratsDialog, 300); // HIGHLIGHT: Trigger dialog correctly
+                    setTimeout(showCongratsDialog, 300);
+                }
                 }
                 } else {
                     result.textContent = `❌ "${word.toUpperCase()}" is not valid.`;
