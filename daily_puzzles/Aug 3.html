@@ -22,10 +22,15 @@
             }
             body {
                 font-family: monospace;
-                padding: 18px;
                 background-color: rgb(248, 243, 237);
-                text-align: center;
                 overflow-x: hidden;
+		overscroll-behavior-y: contain;
+                touch-action: manipulation;
+		min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
             }
             .gameContainer {
                 background-color: bisque;
@@ -33,7 +38,7 @@
                 border-radius: 12px;
                 padding: 40px 30px;
                 text-align: center;
-                width: 350px;
+                max-width: 350px;
                 box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             }
             .subtitle {
@@ -78,11 +83,28 @@
                 position: relative;
                 flex-wrap: nowrap;
             }
+	    #wheel {                 /*#wheel is the container for all wheels*/ 
+                display: flex;
+		touch-action: none;
+                position: relative;
+                height: 250px;
+                width: auto;         /* Allow it to grow to fit all wheels */
+                min-width: 350px;    /* Or set to 5 * wheel width */
+                justify-content: center;
+                /* Fade effect at top and bottom */
+                mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            }
             .wheelContainer {
                 display: flex;
                 flex-direction: column;
+		touch-action: none;
                 align-items: center;
                 margin: 0 5px;
+		height: 250px;
+                width: 50px;            /* Each wheel gets its own width */
+                overflow: visible;      /* Allow overflow for the wheel to scroll */
+                position: relative;
             }
             .wheel {
                 display: flex;
@@ -91,11 +113,26 @@
                 border-radius: 8px;
                 background-color: white;
                 padding: 10px 0;
+		position: absolute;
+                left: 0;
+                right: 0;
+                width: 50px;         /* Match wheelContainer width */
+                transition: top 0.2s;
+                box-sizing: border-box; /* ensures border is included in width/height */
             }
             .letter {
-                font-size: 1em;
-                padding: 5px 0;
-                width: 50px;
+                height: 40px;
+		width: 46px;
+    		line-height: 40px;
+    		font-size: 1.2em;
+    		text-align: center;
+    		color: #bbb;
+    		background: transparent;
+            }
+            .letter.selected {
+                color: black;
+                font-weight: bold;
+                background: #eee;
             }
             .selected {
                 font-weight: bold;
@@ -213,23 +250,65 @@
             dialog.style.display = 'none';
             });	
 
-            function createWheel (i, letters) {
+           function createWheel (i, letters) {
                 const container = document.createElement('div');
-                container.classList.add('wheel-container');
+                container.classList.add('wheelContainer');
+                container.style.position = 'relative';
+                container.style.height = '250px';
+                container.style.overflow = 'hidden';
 
                 const wheelDiv = document.createElement('div');
                 wheelDiv.classList.add('wheel');
                 wheelDiv.id = `wheel${i}`;
+                wheelDiv.style.position = 'absolute';
+                wheelDiv.style.top = '0';
+                wheelDiv.style.left = '0';
+                wheelDiv.style.right = '0';
+                wheelDiv.style.transition = 'top 0.2s';
 
+                let panStartY = null;
+                let panStartTop = 0;
+
+                // Touch pan events
+                wheelDiv.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1) {
+                        panStartY = e.touches[0].clientY;
+                        panStartTop = parseInt(wheelDiv.style.top) || 0;
+                        wheelDiv.style.transition = 'none';
+                    }
+                });
+
+                wheelDiv.addEventListener('touchmove', (e) => {
+                    if (panStartY === null) return;
+                    e.preventDefault();
+                    const deltaY = e.touches[0].clientY - panStartY;
+                    wheelDiv.style.top = `${panStartTop + deltaY}px`;
+                });
+
+                wheelDiv.addEventListener('touchend', (e) => {
+                    if (panStartY === null) return;
+                    const deltaY = e.changedTouches[0].clientY - panStartY;
+                    const letterHeight = 40;
+                    let move = Math.round(-deltaY / letterHeight);
+                    currentIndexes[i] = (currentIndexes[i] + move + letters.length) % letters.length;
+                    wheelDiv.style.transition = 'top 0.2s';
+                    panStartY = null;
+                    updateWheelDisplay(i);
+                });
+
+                // Mouse wheel scroll to move selection (desktop)
                 wheelDiv.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                scrollWheel(i, e.deltaY > 0 ? 1 : -1);
-                });    
+                    e.preventDefault();
+                    const direction = e.deltaY > 0 ? 1 : -1;
+                    currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
+                    updateWheelDisplay(i);
+                });
 
-            container.appendChild(wheelDiv);
-            wheelContainer.appendChild(container);
-            updateWheelDisplay(i);
+                container.appendChild(wheelDiv);
+                wheelContainer.appendChild(container);
+                updateWheelDisplay(i);
             }
+
 
             function renderWheels () {
                 wheelContainer.innerHTML = '';
@@ -242,7 +321,7 @@
                 updateWheelDisplay(wheelIndex);
             }
 
-            function updateWheelDisplay(wheelIndex) {
+             function updateWheelDisplay(wheelIndex) {
                 const letters = wheel[wheelIndex];
                 const display = document.getElementById(`wheel${wheelIndex}`);
                 const index = currentIndexes[wheelIndex];
@@ -250,17 +329,21 @@
                 display.innerHTML = '';
 
                 letters.forEach((letter, i) => {
-                const div = document.createElement('div');
-                div.className = 'letter';
-                if (i === index) div.classList.add('selected');
-                div.textContent = letter;
-
-                div.addEventListener('click', () => {
-                currentIndexes[wheelIndex] = i;
-                updateWheelDisplay(wheelIndex);
+                    const div = document.createElement('div');
+                    div.className = 'letter';
+                    div.style.color = i === index ? 'black' : '#bbb';
+                    div.style.fontWeight = i === index ? 'bold' : 'normal';
+                    div.style.background = i === index ? '#eee' : 'transparent';
+                    div.style.textAlign = 'center';
+                    div.style.height = '40px'; // px, adjust as needed
+                    div.style.lineHeight = '40px';
+                    if (i === index) div.classList.add('selected');
+                    div.textContent = letter;
+                    display.appendChild(div);
                 });
-                display.appendChild(div);
-                })
+
+                // Center the selected letter visually
+                display.style.top = `${-index * 40 + 80}px`; // 80px centers the selected letter, adjust as needed
             }
 
              // Set constant date display
@@ -334,6 +417,7 @@
     </body>
 
 </html>
+
 
 
 
