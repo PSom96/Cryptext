@@ -113,7 +113,7 @@
                 border-radius: 8px;
                 background-color: white;
                 padding: 10px 0;
-		        position: absolute;
+		position: absolute;
                 left: 0;
                 right: 0;
                 width: 50px;         /* Match wheelContainer width */
@@ -122,7 +122,7 @@
             }
             .letter {
                 height: 40px;
-		width: 46px;
+		width: 48px;
     		line-height: 40px;
     		font-size: 1.2em;
     		text-align: center;
@@ -254,7 +254,7 @@
                 const container = document.createElement('div');
                 container.classList.add('wheelContainer');
                 container.style.position = 'relative';
-                container.style.height = '250px'; // Adjust height as needed
+                container.style.height = '250px';
                 container.style.overflow = 'hidden';
 
                 const wheelDiv = document.createElement('div');
@@ -266,42 +266,40 @@
                 wheelDiv.style.right = '0';
                 wheelDiv.style.transition = 'top 0.2s';
 
-                // Drag variables
-                let startY = 0;
-                let currentTop = 0;
-                let dragging = false;
+                let panStartY = null;
+                let panStartTop = 0;
 
-                // Touch events
-                let touchStartY = null;
-
+                // Touch pan events
                 wheelDiv.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 1) {
-                        touchStartY = e.touches[0].clientY;
+                        panStartY = e.touches[0].clientY;
+                        panStartTop = parseInt(wheelDiv.style.top) || 0;
+                        wheelDiv.style.transition = 'none';
                     }
+                });
+
+                wheelDiv.addEventListener('touchmove', (e) => {
+                    if (panStartY === null) return;
+                    e.preventDefault();
+                    const deltaY = e.touches[0].clientY - panStartY;
+                    wheelDiv.style.top = `${panStartTop + deltaY}px`;
                 });
 
                 wheelDiv.addEventListener('touchend', (e) => {
-                    if (touchStartY === null) return;
-                    const touchEndY = e.changedTouches[0].clientY;
-                    const deltaY = touchEndY - touchStartY;
-                    const letterHeight = 40; // Minimum swipe distance in px
-		            const threshold = 20; // Lower threshold for more sensitivity
-
-                     // Calculate how many letters to move based on swipe distance
+                    if (panStartY === null) return;
+                    const deltaY = e.changedTouches[0].clientY - panStartY;
+                    const letterHeight = 40;
                     let move = Math.round(-deltaY / letterHeight);
-
-                    if (Math.abs(deltaY) > threshold) {
-                        currentIndexes[i] = (currentIndexes[i] + move + letters.length) % letters.length;
-                        updateWheelDisplay(i);
-                    }
-                    touchStartY = null;
+                    currentIndexes[i] = (currentIndexes[i] + move + letters.length) % letters.length;
+                    wheelDiv.style.transition = 'top 0.2s';
+                    panStartY = null;
+                    updateWheelDisplay(i);
                 });
 
-                // Mouse wheel scroll to move selection
+                // Mouse wheel scroll to move selection (desktop)
                 wheelDiv.addEventListener('wheel', (e) => {
                     e.preventDefault();
                     const direction = e.deltaY > 0 ? 1 : -1;
-                    const letters = wheel[i];
                     currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
                     updateWheelDisplay(i);
                 });
