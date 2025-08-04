@@ -78,11 +78,26 @@
                 position: relative;
                 flex-wrap: nowrap;
             }
+	    #wheel {                 /*#wheel is the container for all wheels*/ 
+                display: flex;
+                position: relative;
+                height: 250px;
+                width: auto;         /* Allow it to grow to fit all wheels */
+                min-width: 350px;    /* Or set to 5 * wheel width */
+                justify-content: center;
+                /* Fade effect at top and bottom */
+                mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            }
             .wheelContainer {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 margin: 0 5px;
+		height: 250px;
+                width: 50px;            /* Each wheel gets its own width */
+                overflow: visible;      /* Allow overflow for the wheel to scroll */
+                position: relative;
             }
             .wheel {
                 display: flex;
@@ -91,6 +106,12 @@
                 border-radius: 8px;
                 background-color: white;
                 padding: 10px 0;
+		position: absolute;
+                left: 0;
+                right: 0;
+                width: 50px;         /* Match wheelContainer width */
+                transition: top 0.2s;
+                box-sizing: border-box; /* ensures border is included in width/height */
             }
             .letter {
                 font-size: 1em;
@@ -215,20 +236,62 @@
 
             function createWheel (i, letters) {
                 const container = document.createElement('div');
-                container.classList.add('wheel-container');
+                container.classList.add('wheelContainer');
+                container.style.position = 'relative';
+                container.style.height = '250px'; // Adjust height as needed
+                container.style.overflow = 'hidden';
 
                 const wheelDiv = document.createElement('div');
                 wheelDiv.classList.add('wheel');
                 wheelDiv.id = `wheel${i}`;
+                wheelDiv.style.position = 'absolute';
+                wheelDiv.style.top = '0';
+                wheelDiv.style.left = '0';
+                wheelDiv.style.right = '0';
+                wheelDiv.style.transition = 'top 0.2s';
 
+                // Drag variables
+                let startY = 0;
+                let currentTop = 0;
+                let dragging = false;
+
+                // Touch events
+                wheelDiv.addEventListener('touchstart', (e) => {
+                    dragging = true;
+                    startY = e.touches[0].clientY;
+                    wheelDiv.style.transition = 'none';
+                });
+                document.addEventListener('touchmove', (e) => {
+                    if (!dragging) return;
+                    const deltaY = e.touches[0].clientY - startY;
+                    wheelDiv.style.top = `${currentTop + deltaY}px`;
+                });
+                document.addEventListener('touchend', (e) => {
+                    if (!dragging) return;
+                    dragging = false;
+                    const deltaY = e.changedTouches[0].clientY - startY;
+                    const letterHeight = 40;
+                    let move = Math.round(-deltaY / letterHeight);
+                    let newIndex = (currentIndexes[i] + move + letters.length) % letters.length;
+                    currentIndexes[i] = newIndex;
+                    wheelDiv.style.transition = 'top 0.2s';
+                    wheelDiv.style.top = '0px';
+                    currentTop = 0;
+                    updateWheelDisplay(i);
+                });
+
+                // Mouse wheel scroll to move selection
                 wheelDiv.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                scrollWheel(i, e.deltaY > 0 ? 1 : -1);
-                });    
+                    e.preventDefault();
+                    const direction = e.deltaY > 0 ? 1 : -1;
+                    const letters = wheel[i];
+                    currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
+                    updateWheelDisplay(i);
+                });
 
-            container.appendChild(wheelDiv);
-            wheelContainer.appendChild(container);
-            updateWheelDisplay(i);
+                container.appendChild(wheelDiv);
+                wheelContainer.appendChild(container);
+                updateWheelDisplay(i);
             }
 
             function renderWheels () {
