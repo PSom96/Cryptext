@@ -97,7 +97,7 @@
                 align-items: center;
                 margin: 0 5px;
 		height: 250px;
-                width: 70px;            /* Each wheel gets its own width */
+                width: 50px;            /* Each wheel gets its own width */
                 overflow: visible;      /* Allow overflow for the wheel to scroll */
                 position: relative;
             }
@@ -111,7 +111,7 @@
 		position: absolute;
                 left: 0;
                 right: 0;
-                width: 70px;         /* Match wheelContainer width */
+                width: 50px;         /* Match wheelContainer width */
                 transition: top 0.2s;
                 box-sizing: border-box; /* ensures border is included in width/height */
             }
@@ -279,15 +279,14 @@
                     if (touchStartY === null) return;
                     const touchEndY = e.changedTouches[0].clientY;
                     const deltaY = touchEndY - touchStartY;
-                    const threshold = 30; // Minimum swipe distance in px
+                    const threshold = 40; // Minimum swipe distance in px
+		    const threshold = 20; // Lower threshold for more sensitivity
 
-                    if (deltaY < -threshold) {
-                        // Swipe up: previous letter
-                        currentIndexes[i] = (currentIndexes[i] - 1 + letters.length) % letters.length;
-                        updateWheelDisplay(i);
-                    } else if (deltaY > threshold) {
-                        // Swipe down: next letter
-                        currentIndexes[i] = (currentIndexes[i] + 1) % letters.length;
+                     // Calculate how many letters to move based on swipe distance
+                    let move = Math.round(-deltaY / letterHeight);
+
+                    if (Math.abs(deltaY) > threshold) {
+                        currentIndexes[i] = (currentIndexes[i] + move + letters.length) % letters.length;
                         updateWheelDisplay(i);
                     }
                     touchStartY = null;
