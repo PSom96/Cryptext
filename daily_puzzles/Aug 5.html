@@ -251,7 +251,7 @@
                 transition: background-color 0.3s;
             }
             .slider::before {
-                content: "☀️";
+                content: "☀︎";
                 position: absolute;
                 height: 18px;
                 width: 18px;
@@ -266,9 +266,9 @@
             /* Move knob when checked */
             .themeSwitch input:checked + .slider::before {
                 transform: translateX(24px);
-		content: "🌙";
+		content: "☾";
             }
-	    .theme-switch input:checked + .slider::after {
+	    .themeSwitch input:checked + .slider::after {
   		opacity: 1;
 	    }
             .darkMode .slider {
