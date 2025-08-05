@@ -33,7 +33,8 @@
                 text-align: center;
             }
             .gameContainer {
-                background-color: bisque;
+                position: relative;
+		background-color: bisque;
                 border: 2px solid teal;
                 border-radius: 12px;
                 padding: 40px 30px;
@@ -183,7 +184,7 @@
                 padding: 10px 20px;
                 font-size: 1em;
             }
-	        body.darkMode {
+	    body.darkMode {
                 background-color: #121212;
                 color: #f0f0f0;
             }
@@ -214,12 +215,12 @@
             /* Toggle positioning */
             .toggleWrapper {
                 position: absolute;
-                top: 1rem;
-                right: 1rem;
+                top: 0.5rem;
+                right: 0.5rem;
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
-                z-index: 1000;
+                z-index: 10;
             }
             /* Hide emojis depending on mode */
             .sun { display: none; }
@@ -260,7 +261,6 @@
             .themeSwitch input:checked + .slider::before {
                 transform: translateX(18px);
             }
-            /* Optional: color when dark */
             .darkMode .slider {
                 background-color: #666;
             }
