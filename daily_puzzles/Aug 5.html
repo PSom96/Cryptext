@@ -253,14 +253,16 @@
             .slider::before {
                 content: "☀︎";
                 position: absolute;
-                height: 18px;
-                width: 18px;
                 left: 4px;
-                bottom: 3px;
-		font-size: 16px;
-		opacity: 0;
+		top: 4px;
+		height: 18px;
+                width: 18px;
+                font-size: 16px;
                 background-color: white;
                 border-radius: 50%;
+		display: flex;
+  		align-items: center;
+  		justify-content: center;
                 transition: transform 0.3s ease;
             }
             /* Move knob when checked */
@@ -268,9 +270,6 @@
                 transform: translateX(24px);
 		content: "☾";
             }
-	    .themeSwitch input:checked + .slider::after {
-  		opacity: 1;
-	    }
             .darkMode .slider {
                 background-color: #666;
             }
