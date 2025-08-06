@@ -398,7 +398,11 @@
                             document.querySelectorAll('.wheel')[selectedWheelIndex].focus();
                             updateWheelHighlight();
                             break;
-                    }
+			case 'Enter':
+		                e.preventDefault();
+		                checkWord();
+		                break;
+		         }
                 });
 		    
                 container.appendChild(wheelDiv);
