@@ -398,11 +398,12 @@
                             document.querySelectorAll('.wheel')[selectedWheelIndex].focus();
                             updateWheelHighlight();
                             break;
-			case 'Enter':
+			            case 'Enter':
 		                e.preventDefault();
 		                checkWord();
 		                break;
-		         }
+                    };
+                });
 
                 container.appendChild(wheelDiv);
                 wheelContainer.appendChild(container);
@@ -532,5 +533,3 @@
     </body>
 
 </html>
-
-
