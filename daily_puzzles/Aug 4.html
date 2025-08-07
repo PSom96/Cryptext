@@ -3,190 +3,16 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title> Cryptext Word Puzzle </title>
-        <style>
-            @font-face {
-                font-family: 'Neoneon';
-                src: 
-                    url("fonts/Neoneon.woff2") format('woff2'),
-                    url("fonts/Neoneon.woff") format('woff');
-                font-weight: normal;
-                font-style: normal;
-                font-display: swap;
-            }
-            h1.gameTitle {
-                font-family: "Neoneon";
-                font-size: 3rem;
-                color: #188678;
-                text-align: center;
-                margin: 1em 0;
-            }
-            body {
-                font-family: monospace;
-                background-color: rgb(248, 243, 237);
-                overflow-x: hidden;
-		overscroll-behavior-y: contain;
-                touch-action: manipulation;
-		min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-            }
-            .gameContainer {
-                background-color: bisque;
-                border: 2px solid teal;
-                border-radius: 12px;
-                padding: 40px 30px;
-                text-align: center;
-                max-width: 350px;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            }
-            .subtitle {
-                font-size: 1em;
-                margin-bottom: 10px;
-            }
-            .dateDisplay {
-                font-weight: bold;
-            }
-            .triangleArrowLeft {
-                display: inline-block;
-                width: 0;
-                height: 0;
-                border-top: 10px solid transparent;
-                border-bottom: 10px solid transparent;
-                border-right: 10px solid teal;
-                cursor: pointer;
-                margin-right: 10px;
-                vertical-align: middle;
-            }
-            .triangleArrowRight {
-                display: inline-block;
-                width: 0;
-                height: 0;
-                border-top: 10px solid transparent;
-                border-bottom: 10px solid transparent;
-                border-left: 10px solid teal;
-                cursor: pointer;
-                margin-left: 10px;
-                vertical-align: middle;
-            }
-            .dateRow {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-bottom: 20px;
-            }          
-            .wheelsWrapper {
-                display: flex;
-                justify-content: center;
-                margin-top: 40px;
-                position: relative;
-                flex-wrap: nowrap;
-            }
-	    #wheel {                 /*#wheel is the container for all wheels*/ 
-                display: flex;
-		touch-action: none;
-                position: relative;
-                height: 250px;
-                width: auto;         /* Allow it to grow to fit all wheels */
-                min-width: 350px;    /* Or set to 5 * wheel width */
-                justify-content: center;
-                /* Fade effect at top and bottom */
-                mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-            }
-            .wheelContainer {
-                display: flex;
-                flex-direction: column;
-		touch-action: none;
-                align-items: center;
-                margin: 0 5px;
-		height: 250px;
-                width: 50px;            /* Each wheel gets its own width */
-                overflow: visible;      /* Allow overflow for the wheel to scroll */
-                position: relative;
-            }
-            .wheel {
-                display: flex;
-                flex-direction: column;
-                border: 2px solid #222;
-                border-radius: 8px;
-                background-color: white;
-                padding: 10px 0;
-		position: absolute;
-                left: 0;
-                right: 0;
-                width: 50px;         /* Match wheelContainer width */
-                transition: top 0.2s;
-                box-sizing: border-box; /* ensures border is included in width/height */
-            }
-            .letter {
-                height: 40px;
-		width: 46px;
-    		line-height: 40px;
-    		font-size: 1.2em;
-    		text-align: center;
-    		color: #bbb;
-    		background: transparent;
-            }
-            .letter.selected {
-                color: black;
-                font-weight: bold;
-                background: #eee;
-            }
-            .selected {
-                font-weight: bold;
-                background-color: black;
-                color: white;
-            }
-            .selected.correct {
-                background-color: teal;
-            }
-            #result {
-                margin-top: 20px;
-                font-size: 0.75em;
-                font-weight: lighter;
-            }
-            #goalCounter {
-                font-size: 1.2em;
-                margin: 10px 0;
-            }
-            .bottomRow {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 20px;
-                font-size: 1em;
-            }
-            #congratsDialog {
-                display: none;
-                position: fixed;
-                top: 50%; left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: whitesmoke; 
-                padding: 20px;
-                border: 2px solid black; border-radius: 10px;
-                z-index: 10;
-                width: 80%;
-                max-width: 400px;
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            }
-            #overlay {
-                display: none;
-                position: fixed;
-                top: 0; left: 0;
-                width: 100vw; height: 100vh;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 9;
-            }
-            #congratsDialog button {
-                margin-top: 15px;
-                padding: 10px 20px;
-                font-size: 1em;
-            }
-        </style>
+        <link rel="stylesheet" href="stylesheet.css">
     </head>
     <body> 
     <div class="gameContainer">
+	<div class="streakWrapper">
+		<div id="streakCount" class="streakBox">🔥 0</div>
+	</div>
+	<div class="toggleWrapper">
+  		<button id="toggleButton" aria-label="Toggle dark mode">⏾</button>
+	</div>
     <h1 class="gameTitle"> Cryptext </h1>
     <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;"> Select one letter from each wheel <br> to form 5-letter words. </p>
 
@@ -256,6 +82,7 @@
                 container.style.position = 'relative';
                 container.style.height = '250px';
                 container.style.overflow = 'hidden';
+		        container.setAttribute('tabindex', '0'); // make focusable
 
                 const wheelDiv = document.createElement('div');
                 wheelDiv.classList.add('wheel');
@@ -297,13 +124,52 @@
                 });
 
                 // Mouse wheel scroll to move selection (desktop)
-                wheelDiv.addEventListener('wheel', (e) => {
-                    e.preventDefault();
-                    const direction = e.deltaY > 0 ? 1 : -1;
-                    currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
-                    updateWheelDisplay(i);
+               wheelDiv.addEventListener('wheel', (e) => {
+		       e.preventDefault();
+
+		// Set this wheel as selected when scrolling
+		       selectedWheelIndex = i;
+		       updateWheelHighlight();
+		       
+		       const direction = e.deltaY > 0 ? 1 : -1;
+		       currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
+		       updateWheelDisplay(i);
+	        });
+		    
+		container.addEventListener('focus', () => {
+                selectedWheelIndex = i;
+                updateWheelHighlight();
                 });
 
+                // Keyboard navigation
+                container.addEventListener('keydown', (e) => {
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            scrollWheel(selectedWheelIndex, -1);
+                            break;
+                        case 'ArrowDown':
+                            scrollWheel(selectedWheelIndex, 1);
+                            break;
+                        case 'ArrowRight':
+                        case 'Tab':
+                            e.preventDefault();
+                            selectedWheelIndex = (selectedWheelIndex + 1) % wheel.length;
+                            document.querySelectorAll('.wheel')[selectedWheelIndex].focus();
+                            updateWheelHighlight();
+                            break;
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            selectedWheelIndex = (selectedWheelIndex - 1 + wheel.length) % wheel.length;
+                            document.querySelectorAll('.wheel')[selectedWheelIndex].focus();
+                            updateWheelHighlight();
+                            break;
+			case 'Enter':
+		                e.preventDefault();
+		                checkWord();
+		                break;
+		         }
+                });
+		    
                 container.appendChild(wheelDiv);
                 wheelContainer.appendChild(container);
                 updateWheelDisplay(i);
@@ -334,7 +200,7 @@
                     div.style.fontWeight = i === index ? 'bold' : 'normal';
                     div.style.background = i === index ? '#eee' : 'transparent';
                     div.style.textAlign = 'center';
-                    div.style.height = '40px'; // px, adjust as needed
+                    div.style.height = '40px';
                     div.style.lineHeight = '40px';
                     if (i === index) div.classList.add('selected');
                     div.textContent = letter;
@@ -343,6 +209,12 @@
 
                 // Center the selected letter visually
                 display.style.top = `${-index * 40 + 80}px`; // 80px centers the selected letter, adjust as needed
+            }
+
+	    function updateWheelHighlight() {
+                document.querySelectorAll('.wheel').forEach((container, i) => {
+                    container.classList.toggle('focused', i === selectedWheelIndex);
+                });
             }
 
              // Set constant date display
@@ -408,8 +280,78 @@
                 const secs = String(secondsElapsed % 60).padStart(2, '0');
                 timerDisplay.textContent = `Timer: ${mins}:${secs}`;
                 }, 1000);
-            
+
+	    // Dark mode toggle button
+	    const toggleButton = document.getElementById("toggleButton");
+		
+	    // Set initial theme
+	    function setInitialTheme() {
+		const savedTheme = localStorage.getItem("theme");
+		
+		if (savedTheme) {
+		// Use saved preference
+		  applyTheme(savedTheme);
+		} else {
+		// Infer system preference
+		  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+		  applyTheme(prefersDark ? "dark" : "light");
+		}
+		}
+		
+	    // Apply theme and update UI
+	    function applyTheme(theme) {
+		if (theme === "dark") {
+		  document.body.classList.add("darkMode");
+		  toggleButton.textContent = "☀︎"; // sun = switch to light
+	          toggleButton.setAttribute("aria-label", "Switch to light mode");
+		} else {
+		  document.body.classList.remove("darkMode");
+		  toggleButton.textContent = "⏾"; // moon = switch to dark
+		  toggleButton.setAttribute("aria-label", "Switch to dark mode");
+		}
+		
+	    localStorage.setItem("theme", theme);
+		}
+		
+	    // Toggle theme on click
+	    function toggleTheme() {
+		const isDark = document.body.classList.contains("darkMode");
+		applyTheme(isDark ? "light" : "dark");
+		}
+		
+	    // Event listener
+	    toggleButton.addEventListener("click", toggleTheme);
+		
             renderWheels();
+	    updateWheelHighlight();
+
+	    function updateStreak() {
+		const streakBox = document.getElementById("streakCount");
+		const today = new Date().toDateString();
+		const lastPlayed = localStorage.getItem("lastPlayedDate");
+		let streak = parseInt(localStorage.getItem("dailyStreak") || "0");
+		
+		if (lastPlayed !== today) {
+		  const yesterday = new Date();
+		  yesterday.setDate(yesterday.getDate() - 1);
+		  const yesterdayStreak = yesterday.toDateString();
+		
+		if (lastPlayed === yesterdayStreak) {
+		  streak += 1; // continued streak
+		} else {
+		  streak = 1; // reset streak
+		}
+		
+		localStorage.setItem("lastPlayedDate", today);
+		localStorage.setItem("dailyStreak", streak.toString());
+		}
+		
+		streakBox.textContent = `🔥 ${streak}`;
+		}
+		
+		// Call this when the game loads:
+		setInitialTheme();
+		updateStreak();
 
     });
     </script>
