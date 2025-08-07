@@ -11,7 +11,7 @@
 		<div id="streakCount" class="streakBox">🔥 0</div>
 	</div>
 	<div class="toggleWrapper">
-  		<button id="toggleButton" aria-label="Toggle dark mode">⏾</button>
+  		<button id="toggleButton" aria-label="Toggle dark mode">🌙</button>
 	</div>
     <h1 class="gameTitle"> Cryptext </h1>
     <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;"> Select one letter from each wheel <br> to form 5-letter words. </p>
@@ -302,11 +302,11 @@
 	    function applyTheme(theme) {
 		if (theme === "dark") {
 		  document.body.classList.add("darkMode");
-		  toggleButton.textContent = "☀︎"; // sun = switch to light
+		  toggleButton.textContent = "☀️"; // sun = switch to light
 	          toggleButton.setAttribute("aria-label", "Switch to light mode");
 		} else {
 		  document.body.classList.remove("darkMode");
-		  toggleButton.textContent = "⏾"; // moon = switch to dark
+		  toggleButton.textContent = "🌙"; // moon = switch to dark
 		  toggleButton.setAttribute("aria-label", "Switch to dark mode");
 		}
 		
@@ -358,3 +358,4 @@
     </body>
 
 </html>
+
