@@ -246,10 +246,35 @@
 		background-color: #333;
 		color: #f0f0f0;
 	    }
+	    .streakWrapper {
+		position: absolute;
+		top: 0.5rem;
+		left: 0.5rem;
+		z-index: 10;
+	    }
+	    .streakBox {
+		background-color: #f5f5f5;
+		border-radius: 999px;
+		padding: 0.4rem 0.8rem;
+		font-size: 1rem;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+		transition: background-color 0.3s;
+	    }
+	    .darkMode .streakBox {
+		background-color: #444;
+		color: #fff;
+	    }
         </style>
     </head>
     <body> 
     <div class="gameContainer">
+	<div class="streakWrapper">
+		<div id="streakCount" class="streakBox">🔥 0</div>
+	</div>
 	<div class="toggleWrapper">
   		<button id="toggleButton" aria-label="Toggle dark mode">⏾</button>
 	</div>
@@ -459,7 +484,7 @@
 
              // Set constant date display
                 const dateDisplay = document.getElementById('dateDisplay');
-                dateDisplay.textContent = 'AUGUST 6, 2025';
+                dateDisplay.textContent = 'AUGUST 7, 2025';
 
             function checkWord() {
                 const word = currentIndexes.map((idx, i) => wheel[i][idx].toLowerCase()).join('');
@@ -562,12 +587,36 @@
 	    // Event listener
 	    toggleButton.addEventListener("click", toggleTheme);
 		
-	    // Run on page load
-	    setInitialTheme();
-
-	
             renderWheels();
 	    updateWheelHighlight();
+
+	    function updateStreak() {
+		const streakBox = document.getElementById("streakCount");
+		const today = new Date().toDateString();
+		const lastPlayed = localStorage.getItem("lastPlayedDate");
+		let streak = parseInt(localStorage.getItem("dailyStreak") || "0");
+		
+		if (lastPlayed !== today) {
+		  const yesterday = new Date();
+		  yesterday.setDate(yesterday.getDate() - 1);
+		  const yesterdayStreak = yesterday.toDateString();
+		
+		if (lastPlayed === yesterdayStreak) {
+		  streak += 1; // continued streak
+		} else {
+		  streak = 1; // reset streak
+		}
+		
+		localStorage.setItem("lastPlayedDate", today);
+		localStorage.setItem("dailyStreak", streak.toString());
+		}
+		
+		streakBox.textContent = `🔥 ${streak}`;
+		}
+		
+		// Call this when the game loads:
+		setInitialTheme();
+		updateStreak();
 
     });
     </script>
