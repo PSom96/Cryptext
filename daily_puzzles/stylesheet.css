@@ -150,8 +150,8 @@
             }
             #result {
                 margin-top: 20px;
-                font-size: 0.75em;
-                font-weight: lighter;
+                font-size: 1em;
+                font-weight: bold;
             }
             #goalCounter {
                 font-size: 1.2em;
@@ -246,6 +246,13 @@
 		background-color: #333;
 		color: #f0f0f0;
 	    }
+	    body.darkMode #result{
+		margin-top: 20px;
+                font-size: 1em;
+		font-color: 
+                font-weight: bold;
+            }
+		    
 	    .streakWrapper {
 		position: absolute;
 		top: 0.5rem;
