@@ -364,12 +364,17 @@
                 });
 
                 // Mouse wheel scroll to move selection (desktop)
-                wheelDiv.addEventListener('wheel', (e) => {
-                    e.preventDefault();
-                    const direction = e.deltaY > 0 ? 1 : -1;
-                    currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
-                    updateWheelDisplay(i);
-                });
+               wheelDiv.addEventListener('wheel', (e) => {
+		       e.preventDefault();
+
+		// Set this wheel as selected when scrolling
+		       selectedWheelIndex = i;
+		       updateWheelHighlight();
+		       
+		       const direction = e.deltaY > 0 ? 1 : -1;
+		       currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
+		       updateWheelDisplay(i);
+	        });
 		    
 		container.addEventListener('focus', () => {
                 selectedWheelIndex = i;
