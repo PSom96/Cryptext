@@ -224,13 +224,13 @@
                 color: #f0f0f0;
                 border-color: #00bfa5;
             }
-            .modeToggleWrapper {
+            .toggleWrapper {
 		position: absolute;
 		top: 0.5rem;
 		right: 0.5rem;
 		z-index: 10;
 	    }
-	    #modeToggleBtn {
+	    #toggleButton {
 		width: 36px;
 		height: 36px;
 		border-radius: 50%;
@@ -242,7 +242,7 @@
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 		transition: background-color 0.3s, color 0.3s;
 	    }
-	    body.darkMode #modeToggleBtn {
+	    body.darkMode #toggleButton {
 		background-color: #333;
 		color: #f0f0f0;
 	    }
@@ -250,8 +250,8 @@
     </head>
     <body> 
     <div class="gameContainer">
-	<div class="modeToggleWrapper">
-  		<button id="modeToggleBtn" aria-label="Toggle dark mode">⏾</button>
+	<div class="toggleWrapper">
+  		<button id="toggleButton" aria-label="Toggle dark mode">⏾</button>
 	</div>
     <h1 class="gameTitle"> Cryptext </h1>
     <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;"> Select one letter from each wheel <br> to form 5-letter words. </p>
@@ -516,14 +516,50 @@
                 timerDisplay.textContent = `Timer: ${mins}:${secs}`;
                 }, 1000);
 
-	    // Dark mode toggle
-            const modeToggleBtn = document.getElementById("modeToggleBtn");
+	    // Dark mode toggle button
+	    const toggleButton = document.getElementById("toggleButton");
+		
+	    // Set initial theme
+	    function setInitialTheme() {
+		const savedTheme = localStorage.getItem("theme");
+		
+		if (savedTheme) {
+		// Use saved preference
+		  applyTheme(savedTheme);
+		} else {
+		// Infer system preference
+		  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+		  applyTheme(prefersDark ? "dark" : "light");
+		}
+		}
+		
+	    // Apply theme and update UI
+	    function applyTheme(theme) {
+		if (theme === "dark") {
+		  document.body.classList.add("darkMode");
+		  toggleButton.textContent = "☀︎"; // sun = switch to light
+	          toggleButton.setAttribute("aria-label", "Switch to light mode");
+		} else {
+		  document.body.classList.remove("darkMode");
+		  toggleButton.textContent = "⏾"; // moon = switch to dark
+		  toggleButton.setAttribute("aria-label", "Switch to dark mode");
+		}
+		
+	    localStorage.setItem("theme", theme);
+		}
+		
+	    // Toggle theme on click
 	    function toggleTheme() {
-    		const isDark = document.body.classList.toggle("darkMode");
-    		modeToggleBtn.textContent = isDark ? "☀︎" : "⏾";
-  	    }
-	    
-	    modeToggleBtn.addEventListener("click", toggleTheme);
+		const isDark = document.body.classList.contains("darkMode");
+		applyTheme(isDark ? "light" : "dark");
+		}
+		
+	    // Event listener
+	    toggleButton.addEventListener("click", toggleTheme);
+		
+	    // Run on page load
+	    setInitialTheme();
+
 	
             renderWheels();
 	    updateWheelHighlight();
