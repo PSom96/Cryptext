@@ -18,29 +18,29 @@
                 font-family: monospace;
                 background-color: rgb(248, 243, 237);
                 overflow-x: hidden;
-		overscroll-behavior-y: contain;
+				overscroll-behavior-y: contain;
                 touch-action: manipulation;
-		min-height: 100vh;
-		margin: 0;
-    		padding: 0;
+				min-height: 100vh;
+				margin: 0;
+	    		padding: 0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 text-align: center;
-		box-sizing: border-box;
+				box-sizing: border-box;
             }
             .gameContainer {
                 position: relative;
-		background-color: bisque;
+				background-color: bisque;
                 border: 0.125rem solid teal;
                 border-radius: 0.75rem;
                 padding: 2.5rem 1.5rem;
                 text-align: center;
-		width: 100%;
+				width: 100%;
                 max-width: 22.5rem;
                 box-shadow: 1 0.5rem 1.25rem rgba(0, 0, 0, 0.1);
-		box-sizing: border-box;
-		margin: 0 1rem;
+				box-sizing: border-box;
+				margin: 0 1rem;
             }
             .subtitle {
                 font-size: 1em;
@@ -84,9 +84,9 @@
                 position: relative;
                 flex-wrap: nowrap;
             }
-	    #wheel {                 /*#wheel is the container for all wheels*/ 
+	    	#wheel {                 /*#wheel is the container for all wheels*/ 
                 display: flex;
-		touch-action: none;
+				touch-action: none;
                 position: relative;
                 height: 250px;
                 width: auto;         /* Allow it to grow to fit all wheels */
@@ -99,14 +99,14 @@
             .wheelContainer {
                 display: flex;
                 flex-direction: column;
-		touch-action: none;
+				touch-action: none;
                 align-items: center;
                 margin: 0 5px;
-		height: 250px;
+				height: 250px;
                 width: 50px;            /* Each wheel gets its own width */
                 overflow: visible;      /* Allow overflow for the wheel to scroll */
                 position: relative;
-		outline: none;
+				outline: none;
                 transition: box-shadow 0.2s, border-color 0.2s ease;
             }
             .wheel {
@@ -116,24 +116,24 @@
                 border-radius: 8px;
                 background-color: white;
                 padding: 10px 0;
-		position: relative;
+				position: relative;
                 left: 0;
                 right: 0;
                 width: 50px;         /* Match wheelContainer width */
                 transition: top 0.2s;
                 box-sizing: border-box; /* ensures border is included in width/height */
             }
-	     .wheel.focused {
+	     	.wheel.focused {
                 box-shadow: inset 0 3px 3px rgba(71, 22, 22, 0.6), 0 5px 5px rgba(0, 0, 0, 0.6);
             }
             .letter {
-                height: 40px;
-		width: 46px;
-    		line-height: 40px;
-    		font-size: 1.2em;
-    		text-align: center;
-    		color: #bbb;
-    		background: transparent;
+	            height: 40px;
+				width: 46px;
+	    		line-height: 40px;
+	    		font-size: 1.2em;
+	    		text-align: center;
+	    		color: #bbb;
+	    		background: transparent;
             }
             .letter.selected {
                 color: black;
@@ -189,7 +189,7 @@
                 padding: 10px 20px;
                 font-size: 1em;
             }
-	    body.darkMode {
+	    	body.darkMode {
                 background-color: #121212;
                 color: #f0f0f0;
             }
@@ -201,11 +201,11 @@
             body.darkMode h1.gameTitle {
                 color: #00bfa5;
             }
-	    body.darkMode .wheel{
+	    	body.darkMode .wheel{
                 background-color: #333;
                 border-color: #00bfa5;
             }
-	    body.darkMode .wheel.focused {
+	    	body.darkMode .wheel.focused {
                 box-shadow: inset 0 3px 3px rgba(100, 219, 213, 0.7), 0 5px 5px rgba(67, 179, 173, 0.7);
             }
             body.darkMode .letter {
@@ -225,46 +225,46 @@
                 border-color: #00bfa5;
             }
             .toggleWrapper {
-		position: absolute;
-		top: 0.5rem;
-		right: 0.5rem;
-		z-index: 10;
-	    }
-	    #toggleButton {
-		width: 36px;
-		height: 36px;
-		border-radius: 50%;
-		border: none;
-		font-size: 18px;
-		background-color: #f0f0f0;
-		color: #333;
-		cursor: pointer;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-		transition: background-color 0.3s, color 0.3s;
-	    }
-	    body.darkMode #toggleButton {
-		background-color: #333;
-		color: #f0f0f0;
-	    }   
-	    .streakWrapper {
-		position: absolute;
-		top: 0.5rem;
-		left: 0.5rem;
-		z-index: 10;
-	    }
-	    .streakBox {
-		background-color: #f5f5f5;
-		border-radius: 999px;
-		padding: 0.4rem 0.8rem;
-		font-size: 1rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-		transition: background-color 0.3s;
-	    }
-	    .darkMode .streakBox {
-		background-color: #444;
-		color: #fff;
-	    }
+				position: absolute;
+				top: 0.5rem;
+				right: 0.5rem;
+				z-index: 10;
+			    }
+			#toggleButton {
+				width: 36px;
+				height: 36px;
+				border-radius: 50%;
+				border: none;
+				font-size: 18px;
+				background-color: #f0f0f0;
+				color: #333;
+				cursor: pointer;
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+				transition: background-color 0.3s, color 0.3s;
+			    }
+			body.darkMode #toggleButton {
+				background-color: #333;
+				color: #f0f0f0;
+			    }   
+			.streakWrapper {
+				position: absolute;
+				top: 0.5rem;
+				left: 0.5rem;
+				z-index: 10;
+			    }
+			.streakBox {
+				background-color: #f5f5f5;
+				border-radius: 999px;
+				padding: 0.4rem 0.8rem;
+				font-size: 1rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+				transition: background-color 0.3s;
+			    }
+			.darkMode .streakBox {
+				background-color: #444;
+				color: #fff;
+			    }
  
