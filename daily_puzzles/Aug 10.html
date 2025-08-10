@@ -1,0 +1,359 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title> Cryptext Word Puzzle </title>
+        <link rel="stylesheet" href="stylesheet.css">
+    </head>
+    <body> 
+    <div class="gameContainer">
+	<div class="streakWrapper">
+		<div id="streakCount" class="streakBox">🔥 0</div>
+	</div>
+	<div class="toggleWrapper">
+  		<button id="toggleButton" aria-label="Toggle dark mode">🌙</button>
+	</div>
+    <h1 class="gameTitle"> Cryptext </h1>
+    <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;"> Select one letter from each wheel <br> to form 5-letter words. </p>
+
+    <div class="dateRow">
+        <span id="leftArrow" class="triangleArrowLeft"></span>
+        <span class="dateDisplay" id="dateDisplay"></span>
+    </div>
+    
+    <div class="wheelsWrapper">
+        <div id="wheel" style="display: flex"> </div>
+    </div>
+
+    <div>
+        <button id="checkButton" 
+        style="margin-top: 20px; border: 2px; border-radius: 8px; padding: 10px 20px; background-color: teal; font-size: 1em; color: white"> Check </button>
+    </div>
+
+    <div id="result"> </div>
+
+    <div class="bottomRow">
+        <div id="goalTarget"> Goal: 0/7 </div>
+        <div id="timer">Timer: 00:00 </div>
+    </div>
+    </div>
+
+    <div id="overlay"></div>
+    <div id="congratsDialog">
+        <div id="congratsMessage"></div>
+        <button id="returnButton">Return to Game</button>
+    </div>
+
+    <script>
+        document.addEventListener ("DOMContentLoaded", () => {
+            const wheel = [
+                ['S', 'I', 'E', 'S', 'T', 'A'],
+                ['R', 'E', 'L', 'A', 'X'],
+                ['S', 'U', 'N', 'D', 'A', 'Y'],
+                ['S', 'N', 'O', 'O', 'Z', 'E'],
+                ['R', 'E', 'P', 'A', 'I', 'R']
+            ];
+
+            const validWords = ['ardor', 'tease', 'erase', 'elder', 'sauna', 'slyer', 'saner', 'tense', 'tenor', 'truer', 'sense'];
+            const goalTarget = 7;
+                let foundWords = new Set ();
+                let wordsFound = 0;
+            const wheelContainer = document.getElementById('wheel');
+            const currentIndexes = wheel.map(() => 0);
+	        const result = document.getElementById('result');
+            const goalDisplay = document.getElementById('goalTarget');
+            const timerDisplay = document.getElementById('timer');
+            const checkButton = document.getElementById('checkButton');
+
+            const overlay = document.getElementById('overlay');
+            const dialog = document.getElementById('congratsDialog');
+            const message = document.getElementById('congratsMessage');
+            const returnButton = document.getElementById('returnButton');
+
+            returnButton.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            dialog.style.display = 'none';
+            });	
+
+            function createWheel (i, letters) {
+                const container = document.createElement('div');
+                container.classList.add('wheelContainer');
+                container.style.position = 'relative';
+                container.style.height = '250px';
+                container.style.overflow = 'hidden';
+		container.setAttribute('tabindex', '0'); // make focusable
+
+                const wheelDiv = document.createElement('div');
+                wheelDiv.classList.add('wheel');
+                wheelDiv.id = `wheel${i}`;
+                wheelDiv.style.position = 'absolute';
+                wheelDiv.style.top = '0';
+                wheelDiv.style.left = '0';
+                wheelDiv.style.right = '0';
+                wheelDiv.style.transition = 'top 0.2s';
+
+                let panStartY = null;
+                let panStartTop = 0;
+
+                // Touch pan events
+                wheelDiv.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1) {
+                        panStartY = e.touches[0].clientY;
+                        panStartTop = parseInt(wheelDiv.style.top) || 0;
+                        wheelDiv.style.transition = 'none';
+                    }
+                });
+
+                wheelDiv.addEventListener('touchmove', (e) => {
+                    if (panStartY === null) return;
+                    e.preventDefault();
+                    const deltaY = e.touches[0].clientY - panStartY;
+                    wheelDiv.style.top = `${panStartTop + deltaY}px`;
+                });
+
+                wheelDiv.addEventListener('touchend', (e) => {
+                    if (panStartY === null) return;
+                    const deltaY = e.changedTouches[0].clientY - panStartY;
+                    const letterHeight = 40;
+                    let move = Math.round(-deltaY / letterHeight);
+                    currentIndexes[i] = (currentIndexes[i] + move + letters.length) % letters.length;
+                    wheelDiv.style.transition = 'top 0.2s';
+                    panStartY = null;
+                    updateWheelDisplay(i);
+                });
+
+                // Mouse wheel scroll to move selection (desktop)
+               wheelDiv.addEventListener('wheel', (e) => {
+		       e.preventDefault();
+
+		// Set this wheel as selected when scrolling
+		       selectedWheelIndex = i;
+		       updateWheelHighlight();
+		       
+		       const direction = e.deltaY > 0 ? 1 : -1;
+		       currentIndexes[i] = (currentIndexes[i] + direction + letters.length) % letters.length;
+		       updateWheelDisplay(i);
+	        });
+		    
+		container.addEventListener('focus', () => {
+                selectedWheelIndex = i;
+                updateWheelHighlight();
+                });
+
+                // Keyboard navigation
+                container.addEventListener('keydown', (e) => {
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            scrollWheel(selectedWheelIndex, -1);
+                            break;
+                        case 'ArrowDown':
+                            scrollWheel(selectedWheelIndex, 1);
+                            break;
+                        case 'ArrowRight':
+                        case 'Tab':
+                            e.preventDefault();
+                            selectedWheelIndex = (selectedWheelIndex + 1) % wheel.length;
+                            document.querySelectorAll('.wheel')[selectedWheelIndex].focus();
+                            updateWheelHighlight();
+                            break;
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            selectedWheelIndex = (selectedWheelIndex - 1 + wheel.length) % wheel.length;
+                            document.querySelectorAll('.wheel')[selectedWheelIndex].focus();
+                            updateWheelHighlight();
+                            break;
+			case 'Enter':
+		                e.preventDefault();
+		                checkWord();
+		                break;
+		         }
+                });
+		    
+                container.appendChild(wheelDiv);
+                wheelContainer.appendChild(container);
+                updateWheelDisplay(i);
+            }
+
+            function renderWheels () {
+                wheelContainer.innerHTML = '';
+                wheel.forEach((letters, i) => createWheel(i, letters));
+            }
+
+            function scrollWheel(wheelIndex, direction) {
+                const letters = wheel[wheelIndex];
+                currentIndexes[wheelIndex] = (currentIndexes[wheelIndex] + direction + letters.length) % letters.length;
+                updateWheelDisplay(wheelIndex);
+            }
+
+            function updateWheelDisplay(wheelIndex) {
+                const letters = wheel[wheelIndex];
+                const display = document.getElementById(`wheel${wheelIndex}`);
+                const index = currentIndexes[wheelIndex];
+
+                display.innerHTML = '';
+
+                letters.forEach((letter, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'letter';
+                    div.style.color = i === index ? 'black' : '#bbb';
+                    div.style.fontWeight = i === index ? 'bold' : 'normal';
+                    div.style.background = i === index ? '#eee' : 'transparent';
+                    div.style.textAlign = 'center';
+                    div.style.height = '40px';
+                    div.style.lineHeight = '40px';
+                    if (i === index) div.classList.add('selected');
+                    div.textContent = letter;
+                    display.appendChild(div);
+                });
+
+                // Center the selected letter visually
+                display.style.top = `${-index * 40 + 80}px`; // 80px centers the selected letter, adjust as needed
+            }
+
+	    function updateWheelHighlight() {
+                document.querySelectorAll('.wheel').forEach((container, i) => {
+                    container.classList.toggle('focused', i === selectedWheelIndex);
+                });
+            }
+
+             // Set constant date display
+                const dateDisplay = document.getElementById('dateDisplay');
+                dateDisplay.textContent = 'AUGUST 10, 2025';
+
+            function checkWord() {
+                const word = currentIndexes.map((idx, i) => wheel[i][idx].toLowerCase()).join('');
+                const selectedLetters = document.querySelectorAll('.selected');
+                selectedLetters.forEach(el => el.classList.remove('correct'));
+
+                if (validWords.includes(word)) {
+                if (foundWords.has(word)) {
+                    result.textContent = `🙂 "${word.toUpperCase()}" has already been found!`;
+                    result.style.color = 'blue';
+                } else {
+                    foundWords.add(word);
+                    wordsFound++;
+                    goalDisplay.textContent = `Goal: ${wordsFound}/${goalTarget}`;
+                    selectedLetters.forEach(el => el.classList.add('correct'));
+                    result.textContent = `✅ "${word.toUpperCase()}" is a valid word!`;
+                    result.style.color = 'green';
+
+                if (wordsFound === goalTarget) {
+                    setTimeout(showCongratsDialog, 300);
+                }
+                }
+                } else {
+                    result.textContent = `❌ "${word.toUpperCase()}" is not valid.`;
+                    result.style.color = 'red';
+                }
+                }
+    
+            function showCongratsDialog() {
+                const remaining = validWords.length - foundWords.size;
+                
+                if (remaining > 0) {
+                    message.innerHTML = `🎉 You've found ${goalTarget} words! A new puzzle will be available tomorrow.<br><br>There are <strong>${remaining}</strong> more words to find. Want to keep playing?`;
+                    returnButton.style.display = 'inline-block';
+                } else {
+                    message.innerHTML = `🎉 Congratulations! You've found all ${goalTarget} words! A new puzzle will be available tomorrow.`;
+                    returnButton.style.display = 'none';
+                }
+                overlay.style.display = 'block';
+                dialog.style.display = 'block';
+            }
+
+            document.getElementById('leftArrow').addEventListener('click', () => {
+            window.location.href = 'Aug 9.html';
+            });
+            
+            //document.getElementById('rightArrow').addEventListener('click', () => {
+            //window.location.href = 'Aug 9.html';
+            //});
+
+            checkButton.addEventListener('click', checkWord); 
+
+	    // Timer
+            let secondsElapsed = 0;
+            let timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerDisplay.textContent = `Timer: ${mins}:${secs}`;
+                }, 1000);
+
+	    // Dark mode toggle button
+	    const toggleButton = document.getElementById("toggleButton");
+		
+	    // Set initial theme
+	    function setInitialTheme() {
+		const savedTheme = localStorage.getItem("theme");
+		
+		if (savedTheme) {
+		// Use saved preference
+		  applyTheme(savedTheme);
+		} else {
+		// Infer system preference
+		  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+		  applyTheme(prefersDark ? "dark" : "light");
+		}
+		}
+		
+	    // Apply theme and update UI
+	    function applyTheme(theme) {
+		if (theme === "dark") {
+		  document.body.classList.add("darkMode");
+		  toggleButton.textContent = "☀️"; // sun = switch to light
+	          toggleButton.setAttribute("aria-label", "Switch to light mode");
+		} else {
+		  document.body.classList.remove("darkMode");
+		  toggleButton.textContent = "🌙"; // moon = switch to dark
+		  toggleButton.setAttribute("aria-label", "Switch to dark mode");
+		}
+		
+	    localStorage.setItem("theme", theme);
+		}
+		
+	    // Toggle theme on click
+	    function toggleTheme() {
+		const isDark = document.body.classList.contains("darkMode");
+		applyTheme(isDark ? "light" : "dark");
+		}
+		
+	    // Event listener
+	    toggleButton.addEventListener("click", toggleTheme);
+		
+            renderWheels();
+	    updateWheelHighlight();
+
+	    function updateStreak() {
+		const streakBox = document.getElementById("streakCount");
+		const today = new Date().toDateString();
+		const lastPlayed = localStorage.getItem("lastPlayedDate");
+		let streak = parseInt(localStorage.getItem("dailyStreak") || "0");
+		
+		if (lastPlayed !== today) {
+		  const yesterday = new Date();
+		  yesterday.setDate(yesterday.getDate() - 1);
+		  const yesterdayStreak = yesterday.toDateString();
+		
+		if (lastPlayed === yesterdayStreak) {
+		  streak += 1; // continued streak
+		} else {
+		  streak = 1; // reset streak
+		}
+		
+		localStorage.setItem("lastPlayedDate", today);
+		localStorage.setItem("dailyStreak", streak.toString());
+		}
+		
+		streakBox.textContent = `🔥 ${streak}`;
+		}
+		
+		// Call this when the game loads:
+		setInitialTheme();
+		updateStreak();
+
+    });
+    </script>
+    </body>
+
+</html>
