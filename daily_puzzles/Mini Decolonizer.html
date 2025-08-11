@@ -14,6 +14,16 @@
   }
   html,body{height:100%;margin:0;}
 
+  @font-face {
+      font-family: 'Neoneon';
+      src: 
+          url("fonts/Neoneon.woff2") format('woff2'),
+          url("fonts/Neoneon.woff") format('woff');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+  }
+
   body{
     background:var(--bg-light);
     color:#000;
@@ -40,9 +50,10 @@
   }
 
   .title{
-    font-family: "Courier New", Courier, monospace;
-    font-size:1.6rem;
-    margin:0 0 6px;
+    font-family: "Neoneon";
+    font-size:3rem;
+    color: #188678;
+    margin: 1em 0;
     text-align:center;
   }
 
