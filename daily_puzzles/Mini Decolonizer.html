@@ -6,22 +6,29 @@
 <title>Mini Decolonizer</title>
 <style>
   :root{
-    --bg-light: #fce8cf;
+    --bg-light: rgb(248, 243, 237);
     --bg-dark: #121212;
-    --accent: #008080;
+    --accent: teal;
     --highlight: #c0f0e0;
     --highlight-dark: rgb(18, 73, 66);
   }
   html,body{height:100%;margin:0;}
 
   @font-face {
-      font-family: 'Neoneon';
-      src: 
+    font-family: 'Neoneon';
+    src: 
           url("fonts/Neoneon.woff2") format('woff2'),
           url("fonts/Neoneon.woff") format('woff');
-      font-weight: normal;
-      font-style: normal;
-      font-display: swap;
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  h1.gameTitle{
+    font-family: "Neoneon";
+    font-size:3rem;
+    color: teal;
+    text-align:center;
   }
 
   body{
@@ -31,30 +38,29 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:16px;
     box-sizing:border-box;
-  }
+    min-height: 100vh;
+		margin: 0;
+	  padding: 0;
+    text-align: center;
+    overflow-x: hidden;
+		overscroll-behavior-y: contain;
+		}
   body.dark{
     background:var(--bg-dark); color:#fff;
   }
 
-  .game{
-    width:100%;
-    max-width:420px;
-    border:2px solid var(--accent);
-    border-radius:12px;
-    padding:20px;
-    position:relative;
-    background:inherit;
-    box-sizing:border-box;
-  }
-
-  .title{
-    font-family: "Neoneon";
-    font-size:3rem;
-    color: #188678;
-    margin: 1em 0;
-    text-align:center;
+  .gameContainer{
+    position: relative;
+		background-color: bisque;
+    border: 0.125rem solid teal;
+    border-radius: 0.75rem;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    max-width: 100%;
+    box-shadow: 1 0.5rem 1.25rem rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    margin: 0 1rem;
   }
 
   .topRow{
@@ -77,9 +83,12 @@
     border-radius:50%;
     border:none;
     background:#000000;
+    color: #333;
     cursor:pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+		transition: background-color 0.3s, color 0.3s;
   }
-  body.dark #toggleButton{ background:#505050;color:#fff; }
+  body.dark #toggleButton{ background:#333;color:#f0f0f0; }
 
   .grid{
     display:grid;
@@ -160,14 +169,14 @@
 </style>
 </head>
 <body>
-  <div class="game" role="application" aria-label="Adaptive crossword">
+  <div class="gameContainer" role="application" aria-label="Adaptive crossword">
     <div class="topRow">
       <div class="streak" id="streak">🔥 0</div>
       <button id="toggleButton" aria-label="Toggle theme">🌙</button>
     </div>
 
-    <h1 class="title">Mini Decolonizer</h1>
-    <p style="margin:6px 0 8px; text-align:center;">you are a cool person now.</p>
+    <h1 class="gameTitle">Mini Decolonizer</h1>
+    <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;">Learn more about the decolonized world, one clue at a time.<br> Click on numbered squares to see the clues.</p>
 
     <div id="grid" class="grid" aria-hidden="false"></div>
 
