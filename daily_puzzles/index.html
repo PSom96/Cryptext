@@ -4,22 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A Spark Lizard's Den</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="stylesheet.css">
   <style>
+    @font-face {
+      font-family: 'Neoneon';
+      src: 
+          url("fonts/Neoneon.woff2") format('woff2'),
+          url("fonts/Neoneon.woff") format('woff');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
     body {
-      font-family: sans-serif;
+      font-family: monospace;
       margin: 0;
-      background-color: var(--bg);
+      background-color: var(--background);
       color: var(--text);
       transition: background 0.3s, color 0.3s;
     }
     header {
       text-align: center;
       padding: 1.5rem;
-      background: var(--header-bg);
+      background: var(--header-background);
     }
     h1 {
       margin: 0 0 0.5rem;
+      font-family: 'Neoneon';
     }
     .welcome {
       text-align: center;
@@ -28,78 +38,78 @@
       font-size: 1.1rem;
       line-height: 1.5;
     }
-    .game-grid {
+    .gameGrid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
       gap: 1.5rem;
       padding: 1.5rem;
       max-width: 1000px;
       margin: 0 auto;
     }
-    .game-card {
+    .gameCard {
       border-radius: 12px;
       overflow: hidden;
-      background: var(--card-bg);
+      background: var(--card-background);
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
       transition: transform 0.2s;
     }
-    .game-card:hover {
+    .gameCard:hover {
       transform: translateY(-5px);
     }
-    .game-card img {
+    .gameCard image {
       width: 100%;
       height: 180px;
-      object-fit: cover;
+      object-fit: none;
     }
-    .card-content {
+    .cardContent {
       padding: 1rem;
       flex: 1;
     }
-    .card-content h2 {
+    .cardContent h2 {
       margin-top: 0;
       margin-bottom: 0.5rem;
     }
-    .card-content p {
+    .cardContent p {
       flex: 1;
       font-size: 0.95rem;
       line-height: 1.4;
     }
-    .play-btn {
+    .playButton {
       display: inline-block;
       margin-top: 1rem;
       padding: 0.6rem 1rem;
-      background: var(--btn-bg);
-      color: var(--btn-text);
+      background: var(--button-background);
+      color: var(--button-text);
       text-decoration: none;
       border-radius: 8px;
       font-weight: bold;
       transition: background 0.2s;
     }
-    .play-btn:hover {
-      background: var(--btn-hover);
+    .playButton:hover {
+      background: var(--button-hover);
     }
     /* Light/Dark variables */
     :root {
-      --bg: #f8f3ed;
+      --background: #f8f3ed;
       --text: #333;
-      --header-bg: #e6d6c2;
-      --card-bg: white;
-      --btn-bg: #8b5cf6;
-      --btn-hover: #7c3aed;
-      --btn-text: white;
+      --header-background: #e6d6c2;
+      --card-background: white;
+      --button-background: #8b5cf6;
+      --button-hover: #7c3aed;
+      --button-text: white;
     }
     [data-theme="dark"] {
-      --bg: #1c1c1c;
+      --background: #1c1c1c;
       --text: #f0f0f0;
-      --header-bg: #2b2b2b;
-      --card-bg: #2a2a2a;
-      --btn-bg: #8b5cf6;
-      --btn-hover: #7c3aed;
-      --btn-text: white;
+      --header-background: #2b2b2b;
+      --card-background: #2a2a2a;
+      --button-background: #8b5cf6;
+      --button-hover: #7c3aed;
+      --button-text: white;
     }
-    .theme-toggle {
+    .themeToggle {
       position: fixed;
       top: 1rem;
       right: 1rem;
@@ -111,29 +121,29 @@
   </style>
 </head>
 <body>
-  <button id="themeToggle" class="theme-toggle">🌙</button>
+  <button id="themeToggle" class="themeToggle">🌙</button>
   <header>
     <h1> A Spark Lizard's Den</h1>
   </header>
   <div class="welcome">
-    Welcome! Choose your challenge for today — test your wits with the <strong>Cryptext Word Challenge</strong> 
-    or solve the <strong>Mini Decolonizer Crossword</strong>. A new puzzle for each game is available daily.
+    Welcome! Choose your challenge for today. <br> Test your wits with the <strong>Cryptext Word Challenge</strong> 
+    or solve the <strong>Mini Decolonizer Crossword</strong>. <br> A new puzzle for each game is available daily.
   </div>
-  <div class="game-grid">
-    <div class="game-card">
+  <div class="gameGrid">
+    <div class="gameCard">
       <img src="cryptext.png" alt="Cryptex Game Preview">
-      <div class="card-content">
+      <div class="cardContent">
         <h2>Cryptext Word Challenge</h2>
-        <p>Align the rotating letter wheels to form valid words. Race against the clock to improve your best time!</p>
-        <a href="Aug 10.html" class="play-btn">Play Now</a>
+        <p>Align the rotating letter wheels to form valid words. </p>
+        <a href="Aug 11.html" class="play-button">Play Now</a>
       </div>
     </div>
-    <div class="game-card">
+    <div class="gameCard">
       <img src="mini-decolonizer.jpg" alt="Mini Crossword Preview">
-      <div class="card-content">
+      <div class="cardContent">
         <h2>Mini Decolonizer Crossword</h2>
-        <p>A daily 5×5 crossword designed to make you cooler than your friends.</p>
-        <a href="Mini Decolonizer.html" class="play-btn">Play Now</a>
+        <p>A daily 5×5 crossword designed to make you cooler than your friends. Race against the clock to improve your best time!</p>
+        <a href="Mini Decolonizer.html" class="play-button">Play Now</a>
       </div>
     </div>
   </div>
