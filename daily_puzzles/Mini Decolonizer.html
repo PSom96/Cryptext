@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mini Decolonizer</title>
+<style>
+  :root{
+    --bg-light: #fce8cf;
+    --bg-dark: #121212;
+    --accent: #008080;
+    --highlight: #c0f0e0;
+    --highlight-dark: rgb(18, 73, 66);
+  }
+  html,body{height:100%;margin:0;}
+
+  body{
+    background:var(--bg-light);
+    color:#000;
+    font-family: monospace;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    box-sizing:border-box;
+  }
+  body.dark{
+    background:var(--bg-dark); color:#fff;
+  }
+
+  .game{
+    width:100%;
+    max-width:420px;
+    border:2px solid var(--accent);
+    border-radius:12px;
+    padding:20px;
+    position:relative;
+    background:inherit;
+    box-sizing:border-box;
+  }
+
+  .title{
+    font-family: "Courier New", Courier, monospace;
+    font-size:1.6rem;
+    margin:0 0 6px;
+    text-align:center;
+  }
+
+  .topRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .streak{
+    background:#f5f5f5;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:600;
+  }
+  body.dark .streak{ background:#2c2c2c; color:#fff; }
+
+  #toggleButton{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:none;
+    background:#000000;
+    cursor:pointer;
+  }
+  body.dark #toggleButton{ background:#505050;color:#fff; }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(5, 50px);
+    grid-template-rows: repeat(5, 50px);
+    gap:4px;
+    justify-content:center;
+    margin:12px auto;
+  }
+
+  .cell{
+    width:50px;height:50px;
+    background: #fff;
+    border:1px solid var(--accent);
+    position:relative;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor: pointer;
+  }
+  body.dark .cell{ background:#333; border-color: #0b7b73; }
+
+  .cell.black{
+    background:#000;
+    pointer-events:none;
+  }
+  body.dark .cell.black{ background: rgb(190, 207, 207); }
+
+  .cell input{
+    width:100%; height:100%; text-align:center; font-size:1.2rem;
+    border:none; outline:none; background:transparent; color:inherit;
+  }
+
+  .cell .number{
+    position:absolute; top:2px; left:3px; font-size:10px; color:rgba(0,0,0,0.4);
+  }
+  body.dark .cell .number{ color: rgba(211, 191, 191, 0.705); }
+
+  .cell.selected{
+    background: var(--highlight);
+  }
+  body.dark .cell.selected{ background: var(--highlight-dark); color:#000; }
+
+  .wrongLetter{ position:relative; }
+  .wrongLetter::after{
+    content:"";
+    position:absolute;
+    left:50%; top:50%;
+    width:141.4213562373095%; /* sqrt(2) * 100% */
+    height:3px;
+    background:rgba(255,0,0,0.95);
+    transform:translate(-50%,-50%) rotate(-45deg);
+    transform-origin:center;
+    z-index:5; pointer-events:none;
+  }
+
+  .controls{ display:flex; gap:10px; justify-content:center; margin-top:12px;}
+
+  .button{
+    background:var(--accent); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;
+    font-weight:600;
+  }
+
+  .clueBox{ margin-top:12px; text-align:center; min-height:2.2em; font-size:0.95rem; }
+
+  .bottomRow{ 
+    display:flex; 
+    justify-content:space-between; 
+    align-items: center;
+    margin-top:20px;
+    font-size:0.95rem; }
+ 
+  @media (max-width:420px){
+    .grid{ transform:scale(0.95); transform-origin:center; }
+  }
+
+</style>
+</head>
+<body>
+  <div class="game" role="application" aria-label="Adaptive crossword">
+    <div class="topRow">
+      <div class="streak" id="streak">🔥 0</div>
+      <button id="toggleButton" aria-label="Toggle theme">🌙</button>
+    </div>
+
+    <h1 class="title">Mini Decolonizer</h1>
+    <p style="margin:6px 0 8px; text-align:center;">you are a cool person now.</p>
+
+    <div id="grid" class="grid" aria-hidden="false"></div>
+
+    <div id="clueBox" class="clueBox">Select a cell to see its clue.</div>
+
+    <div class="controls">
+      <button id="checkButton" class="button">Check</button>
+      <button id="resetButton" class="button">Reset</button>
+    </div>
+
+    <div class="bottomRow">
+      <div id="info" style="opacity:0.9;">
+        <span id="timer">Timer: 00:00</span>
+        <span id="bestTime" style="margin-left: 8rem">Best time: --:--</span>
+        <span id="dir" style="display: none">ACROSS</span></div>
+    </div>
+  </div>
+
+<script>
+// ========= CONFIG - change these per puzzle ========= 
+
+// black cells list (row, col) zero-indexed 
+const blackCells = [
+  [0,4],[1,2],[3,0]   // example layout: editable
+];
+
+const clues = {
+  across: {
+    // fill with numbers you see when the grid renders 
+    1: "Picketer's foe; blackleg (4)",
+    4: "Exclamation (2)",
+    5: "Short for Chomsky's language theory (2)",
+    7: "Architect of partitioned subcontinent (6)",
+    9: "Vedic ambrosia / Brave New World drug (4)",
+    10: "Industrial Revolution energy (5)"
+  },
+  down: {
+    1: "Trinity member (3)",
+    2: "Find the connection: treasure, nut, pain, war (5)",
+    3: "____ road: WWII supply route to China (5)",
+    6: "Where the American day begins (4)",
+    8: "Weeding tool (3)"
+  }
+};
+
+const answers = {
+  across: {
+    1: "SCAB",
+    4: "OH",
+    5: "UG",
+    7: "NEHRU",
+    9: "SOMA",
+    10: "STEAM"
+  },
+  down: {
+    1: "SON",
+    2: "CHEST",
+    3: "BURMA",
+    6: "GUAM",
+    8: "HOE"
+  }
+};
+
+// ========== END CONFIG ========== 
+
+// utility: create empty layout matrix (5x5) and mark black cells 
+const SIZE = 5;
+const layout = Array.from({length:SIZE}, ()=>Array.from({length:SIZE}, ()=>' '));
+for(const [r,c] of blackCells) if (r>=0 && r<SIZE && c>=0 && c<SIZE) layout[r][c] = '#';
+
+// state 
+let selectedRow = 0, selectedCol = 0;
+let direction = 'across'; // 'across' or 'down'
+let slotMapAcross = {}; // number -> {cells:[{r,c}], length}
+let slotMapDown = {};
+let cellToNumber = {}; // "r,c" -> number (if starting cell)
+let cellToSlots = {}; // "r,c" -> {across:number|null, down:number|null, acrossIndex, downIndex}
+let streak = 0;
+let seconds = 0;
+let timerInterval = null;
+
+// DOM refs 
+const gridEl = document.getElementById('grid');
+const clueBox = document.getElementById('clueBox');
+const streakEl = document.getElementById('streak');
+const timerEl = document.getElementById('timer');
+const dirEl = document.getElementById('dir');
+const toggleButton = document.getElementById('toggleButton');
+
+// --- helper: generate slots (across & down) and numbering --- 
+function generateSlots(){
+  slotMapAcross = {}; slotMapDown = {}; cellToNumber = {}; cellToSlots = {};
+  let nextNum = 1;
+
+  // across scanning
+  for(let r=0;r<SIZE;r++){
+    let c=0;
+    while(c<SIZE){
+      if (layout[r][c] === '#'){ c++; continue; }
+      // start of a run
+      const start = c;
+      while(c<SIZE && layout[r][c] !== '#') c++;
+      const end = c-1;
+      const length = end - start + 1;
+      if (length >= 2){
+        // assign number if left cell is edge or left is black
+        const number = nextNum++;
+        const cells = [];
+        for(let x=start;x<=end;x++){
+          cells.push({r, c:x});
+          const key = `${r},${x}`;
+          if (!cellToSlots[key]) cellToSlots[key] = {across:null,down:null,acrossIndex:null,downIndex:null};
+          cellToSlots[key].across = number;
+          cellToSlots[key].acrossIndex = x - start;
+        }
+        slotMapAcross[number] = {cells, length};
+        cellToNumber[`${r},${start}`] = number;
+      }
+    }
+  }
+
+  // down scanning; numbering should continue but not duplicate numbers used above for starting squares that start down as well
+  // We must follow standard numbering: a cell that starts across and down gets same number; otherwise new number
+  // Reset scanning and reuse numbers where appropriate.
+  // We'll perform a combined pass to ensure numbering consistent:
+  // Rebuild: iterate rows & cols, assign numbers when cell is white and (startsAcross || startsDown).
+  nextNum = 1;
+  // Build map of starts for across and down to decide numbering
+  const startsAcross = {};
+  const startsDown = {};
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      if (layout[r][c] === '#') continue;
+      const isAcrossStart = (c===0 || layout[r][c-1]==='#') && (c+1<SIZE && layout[r][c+1] !== '#');
+      const isDownStart = (r===0 || layout[r-1][c]==='#') && (r+1<SIZE && layout[r+1][c] !== '#');
+      if (isAcrossStart) startsAcross[`${r},${c}`] = true;
+      if (isDownStart) startsDown[`${r},${c}`] = true;
+    }
+  }
+
+  // assign numbers left-to-right, top-to-bottom for cells that start anything
+  const startNumberMap = {};
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      if (layout[r][c] === '#') continue;
+      if (startsAcross[`${r},${c}`] || startsDown[`${r},${c}`]){
+        startNumberMap[`${r},${c}`] = nextNum++;
+        cellToNumber[`${r},${c}`] = startNumberMap[`${r},${c}`];
+      }
+    }
+  }
+
+  // now build across slots using the startNumberMap
+  slotMapAcross = {};
+  for(const key in startNumberMap){
+    const [r,c] = key.split(',').map(Number);
+    if (startsAcross[key]){
+      const number = startNumberMap[key];
+      const cells=[];
+      let x=c;
+      while(x<SIZE && layout[r][x] !== '#'){
+        cells.push({r,c:x});
+        const k=`${r},${x}`;
+        if (!cellToSlots[k]) cellToSlots[k] = {across:null,down:null,acrossIndex:null,downIndex:null};
+        cellToSlots[k].across = number;
+        cellToSlots[k].acrossIndex = cells.length-1;
+        x++;
+      }
+      slotMapAcross[number] = {cells, length:cells.length};
+    }
+  }
+
+  // build down slots
+  slotMapDown = {};
+  for(const key in startNumberMap){
+    const [r,c] = key.split(',').map(Number);
+    if (startsDown[key]){
+      const number = startNumberMap[key];
+      const cells=[];
+      let y=r;
+      while(y<SIZE && layout[y][c] !== '#'){
+        cells.push({r:y,c});
+        const k=`${y},${c}`;
+        if (!cellToSlots[k]) cellToSlots[k] = {across:null,down:null,acrossIndex:null,downIndex:null};
+        cellToSlots[k].down = number;
+        cellToSlots[k].downIndex = cells.length-1;
+        y++;
+      }
+      slotMapDown[number] = {cells, length:cells.length};
+    }
+  }
+}
+
+// render grid DOM 
+function renderGrid(){
+  gridEl.innerHTML = '';
+  generateSlots();
+
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
+      if (layout[r][c] === '#'){
+        cell.classList.add('black');
+      } else {
+        const key = `${r},${c}`;
+        // show number if starting cell
+        const number = cellToNumber[key];
+        if (number){
+          const span = document.createElement('span');
+          span.className = 'number';
+          span.textContent = number;
+          cell.appendChild(span);
+        }
+        const input = document.createElement('input');
+        input.maxLength = 1;
+        input.autocomplete = 'off';
+        input.addEventListener('focus', ()=>selectCell(r,c));
+        input.addEventListener('dblclick', (ev)=>{ ev.stopPropagation(); toggleDirection(r,c); });
+        input.addEventListener('keydown', onCellKeyDown);
+        input.addEventListener('input', onCellInput);
+        cell.appendChild(input);
+
+        // clicking the cell focuses its input
+        cell.addEventListener('click', ()=> {
+          const inp = cell.querySelector('input');
+          if(inp) inp.focus();
+        });
+
+        // double-click on cell (not just input)
+        cell.addEventListener('dblclick', ()=> toggleDirection(r,c));
+      }
+      gridEl.appendChild(cell);
+    }
+  }
+  // initial highlight
+  highlightCurrentSlot();
+  showClueForSelected();
+}
+
+// select cell logic 
+function selectCell(r,c){
+  selectedRow = r; selectedCol = c;
+  // focus the input element
+  const inp = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"] input`);
+  if (inp) inp.focus();
+  highlightCurrentSlot();
+  showClueForSelected();
+}
+
+// find slot containing cell for direction 
+function findSlotForCell(r,c,dir){
+  const key = `${r},${c}`;
+  const mapping = cellToSlots[key];
+  if (!mapping) return null;
+  if (dir === 'across') {
+    const number = mapping.across;
+    return number ? slotMapAcross[number] ? {number,slot:slotMapAcross[number],index:mapping.acrossIndex} : null : null;
+  } else {
+    const number = mapping.down;
+    return number ? slotMapDown[number] ? {number,slot:slotMapDown[number],index:mapping.downIndex} : null : null;
+  }
+}
+
+// highlight current slot (across/down) 
+function highlightCurrentSlot(){
+  document.querySelectorAll('.cell').forEach(c=> c.classList.remove('selected'));
+  const slotInfo = findSlotForCell(selectedRow, selectedCol, direction);
+  if (!slotInfo) {
+    // if current cell doesn't belong to a slot in this direction, try toggling
+    // or simply highlight the single cell
+    const single = document.querySelector(`.cell[data-row="${selectedRow}"][data-col="${selectedCol}"]`);
+    if(single && !single.classList.contains('black')) single.classList.add('selected');
+    return;
+  }
+  for(const {r,c} of slotInfo.slot.cells){
+    const el = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+    if (el && !el.classList.contains('black')) el.classList.add('selected');
+  }
+  // update direction label
+  const dirEl = document.getElementById('dir');      // may be null
+  const bestTimeEl = document.getElementById('bestTime'); // for new UI
+
+}
+
+// show clue for selected cell & direction 
+function showClueForSelected(){
+  const slotInfo = findSlotForCell(selectedRow, selectedCol, direction);
+  if (!slotInfo){
+    clueBox.textContent = 'No clue in that direction for this cell.';
+    return;
+  }
+  const number = slotInfo.number;
+  const clueText = (clues[direction] && clues[direction][number]) ? clues[direction][number] : '(no clue provided)';
+  clueBox.textContent = `${direction.toUpperCase()} ${number}: ${clueText}`;
+}
+
+// toggle direction (double-click or user request) 
+function toggleDirection(r,c){
+  direction = (direction === 'across') ? 'down' : 'across';
+  selectedRow = r; selectedCol = c;
+  highlightCurrentSlot();
+  showClueForSelected();
+}
+
+// check answers cell-by-cell:
+// We will mark a cell wrong if it doesn't match the expected letter
+// for any slot it belongs to (across AND/OR down) — i.e., if either slot expects a different letter.
+
+function checkAnswers(){
+  // first clear previous wrong marks
+  document.querySelectorAll('.cell.wrongLetter').forEach(el=> el.classList.remove('wrongLetter'));
+  // Check across slots
+  for(const numStr in slotMapAcross){
+    const number = Number(numStr);
+    const slot = slotMapAcross[number].cells;
+    const expected = (answers.across && answers.across[number]) ? answers.across[number].toUpperCase() : null;
+    for(let i=0;i<slot.length;i++){
+      const {r,c} = slot[i];
+      const cellEl = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      if (!cellEl || cellEl.classList.contains('black')) continue;
+      const input = cellEl.querySelector('input');
+      const val = input.value.toUpperCase() || '';
+      if (expected){
+        if (val && val !== expected[i]) cellEl.classList.add('wrongLetter');
+        // if empty, don't mark wrong yet
+      }
+    }
+  }
+  // Check down slots
+  for(const numStr in slotMapDown){
+    const number = Number(numStr);
+    const slot = slotMapDown[number].cells;
+    const expected = (answers.down && answers.down[number]) ? answers.down[number].toUpperCase() : null;
+    for(let i=0;i<slot.length;i++){
+      const {r,c} = slot[i];
+      const cellEl = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      if (!cellEl || cellEl.classList.contains('black')) continue;
+      const input = cellEl.querySelector('input');
+      const val = input.value.toUpperCase() || '';
+      if (expected){
+        if (val && val !== expected[i]) cellEl.classList.add('wrongLetter');
+      }
+    }
+  }
+  // If no wrong letters remain and all slots with answers are fully filled -> success
+  const anyWrong = document.querySelector('.cell.wrongLetter') !== null;
+  let allFilledCorrect = true;
+  // Check across answers
+  for(const numStr in slotMapAcross){
+    const number = Number(numStr);
+    const expected = (answers.across && answers.across[number]) ? answers.across[number].toUpperCase() : null;
+    if (!expected) continue;
+    const slot = slotMapAcross[number].cells;
+    let built = '';
+    for(let i=0;i<slot.length;i++){
+      const {r,c} = slot[i];
+      const cellEl = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      const input = cellEl ? cellEl.querySelector('input') : null;
+      built += input ? (input.value.toUpperCase() || ' ') : ' ';
+    }
+    if (built !== expected) { allFilledCorrect = false; break; }
+  }
+  // check down answers similarly if still ok
+  if (allFilledCorrect){
+    for(const numStr in slotMapDown){
+      const number = Number(numStr);
+      const expected = (answers.down && answers.down[number]) ? answers.down[number].toUpperCase() : null;
+      if (!expected) continue;
+      const slot = slotMapDown[number].cells;
+      let built = '';
+      for(let i=0;i<slot.length;i++){
+        const {r,c} = slot[i];
+        const cellEl = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+        const input = cellEl ? cellEl.querySelector('input') : null;
+        built += input ? (input.value.toUpperCase() || ' ') : ' ';
+      }
+      if (built !== expected) { allFilledCorrect = false; break; }
+    }
+  }
+
+  if (!anyWrong && allFilledCorrect){
+    // success
+    streak++;
+    streakEl.textContent = `🔥 ${streak}`;
+    completePuzzle();
+  } else if (anyWrong){
+    // some wrongs indicated; don't change streak
+    // small UX: keep the clue box showing
+  } else {
+    // no explicit wrongs but not fully correct — user incomplete
+    alert("No wrong letters flagged, but puzzle is not yet complete.");
+  }
+}
+
+// remove wrong mark when user types or deletes 
+function onCellInput(e){
+  const cell = e.target.closest('.cell');
+  if (cell) cell.classList.remove('wrongLetter');
+}
+
+// allow keyboard behavior inside inputs (navigation + switching direction) 
+function onCellKeyDown(e){
+  const key = e.key;
+  // arrow key handling: we interpret arrow relative to direction; pressing perpendicular arrow toggles direction
+  if (key.startsWith('Arrow')){
+    e.preventDefault();
+    const prevDir = direction;
+    if (key === 'ArrowRight'){
+      if (direction === 'across') moveInDirection(0,1);
+      else direction = 'across';
+    } else if (key === 'ArrowLeft'){
+      if (direction === 'across') moveInDirection(0,-1);
+      else direction = 'across';
+    } else if (key === 'ArrowDown'){
+      if (direction === 'down') moveInDirection(1,0);
+      else direction = 'down';
+    } else if (key === 'ArrowUp'){
+      if (direction === 'down') moveInDirection(-1,0);
+      else direction = 'down';
+    }
+    // if direction changed, update highlight/clue but don't move
+    if (direction !== prevDir) {
+      highlightCurrentSlot();
+      showClueForSelected();
+    }
+  } else if (key === 'Enter'){
+    // check and move to next cell in slot
+    e.preventDefault();
+    moveToNextInSlot();
+  } else if (key === 'Backspace'){
+    // allow deletion (input handles), wrong mark will be cleared in input listener
+    // no special handling
+  } else {
+    // character typed — after input event, we can auto-advance to next cell in slot (common crossword behavior)
+    // We'll let the input event fire then advance in the 'input' handler after a tiny timeout.
+    setTimeout(()=> {
+      // only advance if a single character present
+      const val = e.target.value;
+      if (val && val.length >= 1){
+        moveInDirection( (direction==='down')?1:0, (direction==='across')?1:0 );
+      }
+    }, 10);
+  }
+
+  // keep focus updated
+  setTimeout(() => {
+    const next = document.querySelector(`.cell[data-row="${selectedRow}"][data-col="${selectedCol}"] input`);
+    if (next) next.focus();
+  }, 0);
+}
+
+// move by dr/dc while skipping black cells and staying in bounds 
+function moveInDirection(dr, dc){
+  let r = selectedRow, c = selectedCol;
+  const tryStep = ()=>{
+    r += dr; c += dc;
+    // wrap? we'll clamp
+    if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return false;
+    if (layout[r][c] === '#') return false;
+    // update selection
+    selectedRow = r; selectedCol = c;
+    highlightCurrentSlot();
+    showClueForSelected();
+    return true;
+  };
+  // try once; if fails (edge or black), don't move
+  tryStep();
+}
+
+// move to next in current slot (used on Enter) 
+function moveToNextInSlot(){
+  const slotInfo = findSlotForCell(selectedRow, selectedCol, direction);
+  if (!slotInfo) return;
+  const idx = slotInfo.index;
+  const nextIdx = idx + 1;
+  if (nextIdx < slotInfo.slot.cells.length){
+    const {r,c} = slotInfo.slot.cells[nextIdx];
+    selectCell(r,c);
+  }
+}
+
+// reset grid 
+function resetGrid(){
+  document.querySelectorAll('.cell').forEach(cell=>{
+    if (cell.classList.contains('black')) return;
+    const input = cell.querySelector('input');
+    if (input) input.value = '';
+    cell.classList.remove('wrongLetter');
+  });
+}
+
+let startTime;
+const bestTimeKey = "cx-best-time";
+
+// Start the timer when the puzzle starts
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    seconds = 0;
+    startTime = Date.now();
+    timerEl.textContent = "Timer: 00:00";
+
+    timerInterval = setInterval(() => {
+        seconds++;
+        const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const secs = String(seconds % 60).padStart(2, '0');
+        timerEl.textContent = `Timer: ${mins}:${secs}`;
+    }, 1000);
+}
+
+// Stop timer when puzzle is completed
+function completePuzzle() {
+    clearInterval(timerInterval);
+    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+
+    const bestTime = Number(localStorage.getItem(bestTimeKey));
+    let message = `🎉 Congratulations! You completed the puzzle in ${formatTime(elapsedSeconds)}.\nThe next puzzle will be available tomorrow.`;
+
+    if (!bestTime || elapsedSeconds < bestTime) {
+        localStorage.setItem(bestTimeKey, elapsedSeconds);
+        message = `🏆 New Record! You completed the puzzle in ${formatTime(elapsedSeconds)} — your fastest time yet!\nThe next puzzle will be available tomorrow.`;
+    }
+
+    alert(message);
+    displayBestTime();
+}
+
+// Display best time in bottom row
+function displayBestTime() {
+    const bestTime = Number(localStorage.getItem(bestTimeKey));
+    const bestTimeDisplay = document.getElementById("bestTime");
+    if (bestTime) {
+        bestTimeDisplay.textContent = `Best Time: ${formatTime(bestTime)}`;
+    } else {
+        bestTimeDisplay.textContent = "Best Time: --:--";
+    }
+}
+
+// Helper: format seconds to MM:SS
+function formatTime(totalSeconds) {
+    const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const secs = String(totalSeconds % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
+}
+
+// Call displayBestTime() on page load
+document.addEventListener("DOMContentLoaded", () => {
+    displayBestTime();
+});
+
+// startTimer(); // when puzzle starts
+// completePuzzle(); // when puzzle is solved
+
+
+// theme toggle 
+function applyTheme(isDark) {
+  document.body.classList.toggle('dark', isDark);
+  toggleButton.textContent = isDark ? '☀️' : '🌙'; // show opposite of current mode
+}
+
+// try saved theme or system preference 
+(function initTheme() {
+  const saved = localStorage.getItem('cx-theme');
+  const isDark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(isDark);
+})();
+
+// handle toggle click 
+toggleButton.addEventListener('click', () => {
+  const isCurrentlyDark = document.body.classList.contains('dark');
+  const newIsDark = !isCurrentlyDark;
+  applyTheme(newIsDark);
+  localStorage.setItem('cx-theme', newIsDark ? 'dark' : 'light');
+});
+
+
+// wire buttons 
+document.getElementById('checkButton').addEventListener('click', checkAnswers);
+document.getElementById('resetButton').addEventListener('click', resetGrid);
+
+// remove wrong mark on any input change 
+document.addEventListener('input', (e)=>{
+  if (e.target && e.target.tagName === 'INPUT'){
+    const cell = e.target.closest('.cell');
+    if (cell) cell.classList.remove('wrongLetter');
+  }
+});
+
+// initialize UI 
+renderGrid();
+startTimer();
+
+// initial select - choose first non-black cell 
+(function pickInitial(){
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      if (layout[r][c] !== '#'){ selectCell(r,c); return; }
+    }
+  }
+})();
+
+</script>
+</body>
+</html>
