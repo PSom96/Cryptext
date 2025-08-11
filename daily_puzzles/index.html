@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A Spark Lizard's Den</title>
-  <link rel="stylesheet" href="stylesheet.css">
   <style>
     @font-face {
       font-family: 'Neoneon';
@@ -21,6 +20,7 @@
       background-color: var(--background);
       color: var(--text);
       transition: background 0.3s, color 0.3s;
+      flex-direction: column;
     }
     header {
       text-align: center;
@@ -34,7 +34,7 @@
     .welcome {
       text-align: center;
       margin: 1rem auto;
-      max-width: 600px;
+      max-width: 100%;
       font-size: 1.1rem;
       line-height: 1.5;
     }
@@ -54,25 +54,29 @@
       display: flex;
       flex-direction: column;
       transition: transform 0.2s;
+      height: 100%;
     }
     .gameCard:hover {
       transform: translateY(-5px);
     }
-    .gameCard image {
+    .gameCard img {
       width: 100%;
-      height: 180px;
-      object-fit: scale down;
+      height: 250px;
+      object-fit: cover;
     }
     .cardContent {
       padding: 1rem;
-      flex: 1;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+
     }
     .cardContent h2 {
       margin-top: 0;
       margin-bottom: 0.5rem;
     }
     .cardContent p {
-      flex: 1;
+      flex-grow: 1;
       font-size: 0.95rem;
       line-height: 1.4;
     }
@@ -131,19 +135,29 @@
   </div>
   <div class="gameGrid">
     <div class="gameCard">
-      <img src="cryptext.png" alt="Cryptex Game Preview">
+    <iframe 
+      src="Aug 11.html"
+      title="Cryptex Game Preview"
+      class="cardPreview"
+      sandbox="allow-scripts allow-same-origin"
+    ></iframe>
       <div class="cardContent">
         <h2>Cryptext Word Challenge</h2>
         <p>Align the rotating letter wheels to form valid words. </p>
-        <a href="Aug 11.html" class="play-button">Play Now</a>
+        <a href="Aug 11.html" class="playButton">Play Now</a>
       </div>
     </div>
     <div class="gameCard">
-      <img src="mini-decolonizer.jpg" alt="Mini Crossword Preview">
+    <iframe 
+      src="Mini Decolonizer.html"
+      title="Mini Decolonizer Puzzle Preview"
+      class="cardPreview"
+      sandbox="allow-scripts allow-same-origin"
+    ></iframe>
       <div class="cardContent">
         <h2>Mini Decolonizer Crossword</h2>
         <p>A daily 5×5 crossword designed to make you cooler than your friends. Race against the clock to improve your best time!</p>
-        <a href="Mini Decolonizer.html" class="play-button">Play Now</a>
+        <a href="Mini Decolonizer.html" class="playButton">Play Now</a>
       </div>
     </div>
   </div>
