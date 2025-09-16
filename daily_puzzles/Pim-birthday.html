@@ -52,7 +52,7 @@
 
   .gameContainer{
     position: relative;
-		background-color: bisque;
+    background-color: bisque;
     border: 0.125rem solid teal;
     border-radius: 0.75rem;
     padding: 2.5rem 1.5rem;
@@ -62,6 +62,10 @@
     box-sizing: border-box;
     margin: 0 1rem;
   }
+
+  body.dark .gameContainer{
+    background:var(--bg-dark); color:#fff;
+}
 
   .topRow{
     display:flex;
@@ -86,7 +90,7 @@
     color: #333;
     cursor:pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-		transition: background-color 0.3s, color 0.3s;
+    transition: background-color 0.3s, color 0.3s;
   }
   body.dark #toggleButton{ background:#333;color:#f0f0f0; }
 
@@ -175,8 +179,8 @@
       <button id="toggleButton" aria-label="Toggle theme">🌙</button>
     </div>
 
-    <h1 class="gameTitle">Mini Decolonizer</h1>
-    <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;">Learn more about the decolonized world, one clue at a time.<br> Click on numbered squares to see the clues.</p>
+    <h1 class="gameTitle">Happy Pim Day!</h1>
+    <p style="font-size: 1em; margin-top: 0; margin-bottom: 20px;">We're celebrating Pim today!<br> Click on numbered squares to see the clues.</p>
 
     <div id="grid" class="grid" aria-hidden="false"></div>
 
@@ -200,43 +204,41 @@
 
 // black cells list (row, col) zero-indexed 
 const blackCells = [
-  [0,4],[1,2],[3,0]   // example layout: editable
+  [0,0],[2,0],[2,4],[4,4]   // example layout: editable
 ];
 
 const clues = {
   across: {
     // fill with numbers you see when the grid renders 
-    1: "Picketer's foe; blackleg (4)",
-    4: "Exclamation (2)",
-    5: "Short for Chomsky's language theory (2)",
-    7: "Architect of partitioned subcontinent (6)",
-    9: "Vedic ambrosia / Brave New World drug (4)",
-    10: "Industrial Revolution energy (5)"
+    1: "KGB's predecessor",
+    5: "Pim once hit a squirrel with a blunt ___",
+    6: "A possessive adjective in a language Pim is currently learning",
+    7: "Mild-mannered sport associated with Pim's high school suspension",
+    8: "Pim prefers his ice cream in ___"
   },
   down: {
-    1: "Trinity member (3)",
-    2: "Find the connection: treasure, nut, pain, war (5)",
-    3: "____ road: WWII supply route to China (5)",
-    6: "Where the American day begins (4)",
-    8: "Weeding tool (3)"
+    1: "Prefix with -pedic",
+    2: "Pim's fav local party",
+    3: "Entourage",
+    4: "Pim's alma mater",
+    7: "You can do this to recipients"
   }
 };
 
 const answers = {
   across: {
-    1: "SCAB",
-    4: "OH",
-    5: "UG",
-    7: "NEHRU",
-    9: "SOMA",
-    10: "STEAM"
+    1: "OGPU",
+    5: "ARROW",
+    6: "TES",
+    7: "CHESS",
+    8: "CONE"
   },
   down: {
-    1: "SON",
-    2: "CHEST",
-    3: "BURMA",
-    6: "GUAM",
-    8: "HOE"
+    1: "ORTHO",
+    2: "GREEN",
+    3: "POSSE",
+    4: "UW",
+    7: "CC"
   }
 };
 
